@@ -28,6 +28,7 @@ import org.testng.annotations.Test;
 import com.ning.billing.ObjectType;
 import com.ning.billing.util.UtilTestSuiteWithEmbeddedDB;
 import com.ning.billing.util.api.CustomFieldApiException;
+import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.customfield.dao.CustomFieldDao;
 import com.ning.billing.util.customfield.dao.CustomFieldModelDao;
 import com.ning.billing.util.customfield.dao.DefaultCustomFieldDao;
@@ -39,11 +40,14 @@ public class TestFieldStore extends UtilTestSuiteWithEmbeddedDB {
     private final Logger log = LoggerFactory.getLogger(TestFieldStore.class);
     private CustomFieldDao customFieldDao;
 
+    private CacheControllerDispatcher controllerDispatcher = new CacheControllerDispatcher();
+
+
     @BeforeClass(groups = "slow")
     protected void setup() throws IOException {
         try {
             final IDBI dbi = getDBI();
-            customFieldDao = new DefaultCustomFieldDao(dbi);
+            customFieldDao = new DefaultCustomFieldDao(dbi, clock, controllerDispatcher);
         } catch (Throwable t) {
             log.error("Setup failed", t);
             fail(t.toString());

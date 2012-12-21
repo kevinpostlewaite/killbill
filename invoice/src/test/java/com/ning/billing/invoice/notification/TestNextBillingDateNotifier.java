@@ -45,6 +45,7 @@ import com.ning.billing.invoice.glue.InvoiceModuleWithMocks;
 import com.ning.billing.invoice.template.formatters.DefaultInvoiceFormatterFactory;
 import com.ning.billing.lifecycle.KillbillService;
 import com.ning.billing.mock.glue.MockJunctionModule;
+import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.callcontext.InternalCallContextFactory;
 import com.ning.billing.util.callcontext.InternalTenantContext;
 import com.ning.billing.util.clock.Clock;
@@ -57,6 +58,7 @@ import com.ning.billing.util.entity.dao.EntitySqlDaoTransactionalJdbiWrapper;
 import com.ning.billing.util.entity.dao.EntitySqlDaoWrapperFactory;
 import com.ning.billing.util.glue.BusModule;
 import com.ning.billing.util.glue.BusModule.BusType;
+import com.ning.billing.util.glue.CacheModule;
 import com.ning.billing.util.glue.NotificationQueueModule;
 import com.ning.billing.util.glue.TagStoreModule;
 import com.ning.billing.util.notificationq.NotificationQueueService;
@@ -81,6 +83,7 @@ public class TestNextBillingDateNotifier extends InvoiceTestSuiteWithEmbeddedDB 
     private NotificationQueueService notificationQueueService;
     private InternalCallContextFactory internalCallContextFactory;
     private EntitySqlDaoTransactionalJdbiWrapper entitySqlDaoTransactionalJdbiWrapper;
+    private CacheControllerDispatcher controllerDispatcher;
 
     private static final class InvoiceListenerMock extends InvoiceListener {
 
@@ -125,6 +128,7 @@ public class TestNextBillingDateNotifier extends InvoiceTestSuiteWithEmbeddedDB 
                 install(new NotificationQueueModule());
                 install(new TemplateModule());
                 install(new TagStoreModule());
+                install(new CacheModule());
 
                 final DBTestingHelper helper = KillbillTestSuiteWithEmbeddedDB.getDBTestingHelper();
                 if (helper.isUsingLocalInstance()) {
@@ -148,8 +152,9 @@ public class TestNextBillingDateNotifier extends InvoiceTestSuiteWithEmbeddedDB 
 
         clock = g.getInstance(Clock.class);
         final IDBI dbi = g.getInstance(IDBI.class);
+        controllerDispatcher = g.getInstance(CacheControllerDispatcher.class);
 
-        entitySqlDaoTransactionalJdbiWrapper = new EntitySqlDaoTransactionalJdbiWrapper(dbi);
+        entitySqlDaoTransactionalJdbiWrapper = new EntitySqlDaoTransactionalJdbiWrapper(dbi, clock, controllerDispatcher);
 
         eventBus = g.getInstance(InternalBus.class);
         notificationQueueService = g.getInstance(NotificationQueueService.class);

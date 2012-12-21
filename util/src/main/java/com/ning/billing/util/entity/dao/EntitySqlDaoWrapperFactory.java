@@ -18,6 +18,8 @@ package com.ning.billing.util.entity.dao;
 
 import java.lang.reflect.Proxy;
 
+import com.ning.billing.util.cache.CacheControllerDispatcher;
+import com.ning.billing.util.clock.Clock;
 import com.ning.billing.util.entity.Entity;
 
 /**
@@ -30,9 +32,13 @@ import com.ning.billing.util.entity.Entity;
 public class EntitySqlDaoWrapperFactory<InitialSqlDao extends EntitySqlDao> {
 
     private final InitialSqlDao sqlDao;
+    private final Clock clock;
+    private final CacheControllerDispatcher cacheControllerDispatcher;
 
-    public EntitySqlDaoWrapperFactory(final InitialSqlDao sqlDao) {
+    public EntitySqlDaoWrapperFactory(final InitialSqlDao sqlDao, final Clock clock, final CacheControllerDispatcher cacheControllerDispatcher) {
         this.sqlDao = sqlDao;
+        this.clock = clock;
+        this.cacheControllerDispatcher = cacheControllerDispatcher;
     }
 
     /**
@@ -59,7 +65,7 @@ public class EntitySqlDaoWrapperFactory<InitialSqlDao extends EntitySqlDao> {
         final ClassLoader classLoader = newSqlDao.getClass().getClassLoader();
         final Class[] interfacesToImplement = {newSqlDaoClass};
         final EntitySqlDaoWrapperInvocationHandler<NewSqlDao, NewEntityModelDao, NewEntity> wrapperInvocationHandler =
-                new EntitySqlDaoWrapperInvocationHandler<NewSqlDao, NewEntityModelDao, NewEntity>(newSqlDaoClass, newSqlDao);
+                new EntitySqlDaoWrapperInvocationHandler<NewSqlDao, NewEntityModelDao, NewEntity>(newSqlDaoClass, newSqlDao, clock, cacheControllerDispatcher);
 
         final Object newSqlDaoObject = Proxy.newProxyInstance(classLoader, interfacesToImplement, wrapperInvocationHandler);
         return newSqlDaoClass.cast(newSqlDaoObject);

@@ -43,6 +43,7 @@ import com.ning.billing.invoice.dao.InvoiceItemSqlDao;
 import com.ning.billing.invoice.dao.InvoiceSqlDao;
 import com.ning.billing.invoice.notification.MockNextBillingDatePoster;
 import com.ning.billing.invoice.notification.NextBillingDatePoster;
+import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.callcontext.InternalCallContextFactory;
 import com.ning.billing.util.clock.Clock;
 import com.ning.billing.util.clock.ClockMock;
@@ -61,6 +62,7 @@ public class TestDefaultInvoicePaymentApi extends InvoiceTestSuiteWithEmbeddedDB
     private static final Currency CURRENCY = Currency.EUR;
 
     private final Clock clock = new ClockMock();
+    private final CacheControllerDispatcher controllerDispatcher = new CacheControllerDispatcher();
 
     private InvoiceSqlDao invoiceSqlDao;
     private InvoiceItemSqlDao invoiceItemSqlDao;
@@ -80,7 +82,7 @@ public class TestDefaultInvoicePaymentApi extends InvoiceTestSuiteWithEmbeddedDB
 
         final NextBillingDatePoster nextBillingDatePoster = new MockNextBillingDatePoster();
         internalCallContextFactory = new InternalCallContextFactory(dbi, clock);
-        final InvoiceDao invoiceDao = new DefaultInvoiceDao(dbi, nextBillingDatePoster, Mockito.mock(InternalBus.class));
+        final InvoiceDao invoiceDao = new DefaultInvoiceDao(dbi, nextBillingDatePoster, Mockito.mock(InternalBus.class), clock, controllerDispatcher);
         invoicePaymentApi = new DefaultInvoicePaymentApi(invoiceDao, internalCallContextFactory);
         invoiceInternalApi = new DefaultInvoiceInternalApi(invoiceDao);
     }

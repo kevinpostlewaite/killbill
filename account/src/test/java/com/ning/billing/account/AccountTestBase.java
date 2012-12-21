@@ -39,6 +39,7 @@ import com.ning.billing.util.audit.dao.AuditDao;
 import com.ning.billing.util.audit.dao.DefaultAuditDao;
 import com.ning.billing.util.bus.DefaultBusService;
 import com.ning.billing.util.bus.InMemoryInternalBus;
+import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.callcontext.DefaultCallContextFactory;
 import com.ning.billing.util.callcontext.InternalCallContextFactory;
 import com.ning.billing.util.clock.Clock;
@@ -66,6 +67,7 @@ public abstract class AccountTestBase extends AccountTestSuiteWithEmbeddedDB {
     protected CustomFieldDao customFieldDao;
     protected TagDefinitionDao tagDefinitionDao;
     protected TagDao tagDao;
+    protected CacheControllerDispatcher controllerDispatcher;
 
     protected AccountUserApi accountUserApi;
 
@@ -75,11 +77,12 @@ public abstract class AccountTestBase extends AccountTestSuiteWithEmbeddedDB {
             final IDBI dbi = getDBI();
 
             final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(dbi, clock);
-            accountDao = new DefaultAccountDao(dbi, bus, internalCallContextFactory);
+            accountDao = new DefaultAccountDao(dbi, bus, clock, controllerDispatcher, internalCallContextFactory);
             auditDao = new DefaultAuditDao(dbi);
-            customFieldDao = new DefaultCustomFieldDao(dbi);
-            tagDefinitionDao = new DefaultTagDefinitionDao(dbi, tagEventBuilder, bus);
-            tagDao = new DefaultTagDao(dbi, tagEventBuilder, bus);
+            customFieldDao = new DefaultCustomFieldDao(dbi, clock, controllerDispatcher);
+            tagDefinitionDao = new DefaultTagDefinitionDao(dbi, tagEventBuilder, bus, clock, controllerDispatcher);
+            tagDao = new DefaultTagDao(dbi, tagEventBuilder, bus, clock, controllerDispatcher);
+            controllerDispatcher = new CacheControllerDispatcher();
 
             // Health check test to make sure MySQL is setup properly
             accountDao.test(internalCallContext);

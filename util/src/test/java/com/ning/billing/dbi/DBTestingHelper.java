@@ -47,14 +47,14 @@ public abstract class DBTestingHelper {
     protected IDBI dbiInstance = null;
 
     public synchronized IDBI getDBI() {
-        if (dbiInstance == null) {
-            final String dbiString = getJdbcConnectionString();
-            dbiInstance = new DBIProvider(dbiString, USERNAME, PASSWORD).get();
-        }
+        createInstanceIfNull();
         return dbiInstance;
     }
 
     public void initDb() throws IOException {
+
+        createInstanceIfNull();
+
         // We always want the accounts and tenants table
         initDb("drop table if exists accounts;" +
                "CREATE TABLE accounts (\n" +
@@ -162,4 +162,11 @@ public abstract class DBTestingHelper {
     public abstract void start() throws IOException;
 
     public abstract void stop();
+
+    private synchronized void createInstanceIfNull() {
+        if (dbiInstance == null) {
+            final String dbiString = getJdbcConnectionString();
+            dbiInstance = new DBIProvider(dbiString, USERNAME, PASSWORD).get();
+        }
+    }
 }

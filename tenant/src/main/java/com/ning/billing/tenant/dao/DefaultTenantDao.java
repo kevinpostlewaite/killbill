@@ -32,8 +32,10 @@ import com.ning.billing.ErrorCode;
 import com.ning.billing.tenant.api.Tenant;
 import com.ning.billing.tenant.api.TenantApiException;
 import com.ning.billing.tenant.security.KillbillCredentialsMatcher;
+import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.callcontext.InternalCallContext;
 import com.ning.billing.util.callcontext.InternalTenantContext;
+import com.ning.billing.util.clock.Clock;
 import com.ning.billing.util.entity.dao.EntityDaoBase;
 import com.ning.billing.util.entity.dao.EntitySqlDao;
 import com.ning.billing.util.entity.dao.EntitySqlDaoTransactionWrapper;
@@ -51,8 +53,8 @@ public class DefaultTenantDao extends EntityDaoBase<TenantModelDao, Tenant, Tena
     private final RandomNumberGenerator rng = new SecureRandomNumberGenerator();
 
     @Inject
-    public DefaultTenantDao(final IDBI dbi) {
-        super(new EntitySqlDaoTransactionalJdbiWrapper(dbi), TenantSqlDao.class);
+    public DefaultTenantDao(final IDBI dbi, final Clock clock, final CacheControllerDispatcher cacheControllerDispatcher) {
+        super(new EntitySqlDaoTransactionalJdbiWrapper(dbi, clock, cacheControllerDispatcher), TenantSqlDao.class);
     }
 
     @Override

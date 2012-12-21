@@ -20,6 +20,8 @@ import org.skife.jdbi.v2.IDBI;
 import org.skife.jdbi.v2.Transaction;
 import org.skife.jdbi.v2.TransactionStatus;
 
+import com.ning.billing.util.cache.CacheControllerDispatcher;
+import com.ning.billing.util.clock.Clock;
 import com.ning.billing.util.entity.Entity;
 
 /**
@@ -28,9 +30,13 @@ import com.ning.billing.util.entity.Entity;
 public class EntitySqlDaoTransactionalJdbiWrapper {
 
     private final IDBI dbi;
+    private final Clock clock;
+    private final CacheControllerDispatcher cacheControllerDispatcher;
 
-    public EntitySqlDaoTransactionalJdbiWrapper(final IDBI dbi) {
+    public EntitySqlDaoTransactionalJdbiWrapper(final IDBI dbi, final Clock clock, final CacheControllerDispatcher cacheControllerDispatcher) {
         this.dbi = dbi;
+        this.clock = clock;
+        this.cacheControllerDispatcher = cacheControllerDispatcher;
     }
 
     class JdbiTransaction<ReturnType, M extends EntityModelDao<E>, E extends Entity> implements Transaction<ReturnType, EntitySqlDao<M, E>> {
@@ -43,7 +49,7 @@ public class EntitySqlDaoTransactionalJdbiWrapper {
 
         @Override
         public ReturnType inTransaction(final EntitySqlDao<M, E> transactionalSqlDao, final TransactionStatus status) throws Exception {
-            final EntitySqlDaoWrapperFactory<EntitySqlDao> factoryEntitySqlDao = new EntitySqlDaoWrapperFactory<EntitySqlDao>(transactionalSqlDao);
+            final EntitySqlDaoWrapperFactory<EntitySqlDao> factoryEntitySqlDao = new EntitySqlDaoWrapperFactory<EntitySqlDao>(transactionalSqlDao, clock, cacheControllerDispatcher);
             return entitySqlDaoTransactionWrapper.inTransaction(factoryEntitySqlDao);
         }
     }

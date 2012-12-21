@@ -39,6 +39,7 @@ import com.ning.billing.invoice.notification.MockNextBillingDatePoster;
 import com.ning.billing.invoice.notification.NextBillingDatePoster;
 import com.ning.billing.invoice.tests.InvoicingTestBase;
 import com.ning.billing.util.bus.InMemoryInternalBus;
+import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.callcontext.InternalCallContext;
 import com.ning.billing.util.clock.Clock;
 import com.ning.billing.util.clock.ClockMock;
@@ -63,6 +64,8 @@ public class InvoiceDaoTestBase extends InvoicingTestBase {
     protected Clock clock;
     protected InvoiceGenerator generator;
     protected InternalBus bus;
+    protected CacheControllerDispatcher controllerDispatcher;
+
 
     private final InvoiceConfig invoiceConfig = new InvoiceConfig() {
         @Override
@@ -99,7 +102,8 @@ public class InvoiceDaoTestBase extends InvoicingTestBase {
         bus.start();
 
         final NextBillingDatePoster nextBillingDatePoster = new MockNextBillingDatePoster();
-        invoiceDao = new DefaultInvoiceDao(dbi, nextBillingDatePoster, bus);
+        controllerDispatcher = new CacheControllerDispatcher();
+        invoiceDao = new DefaultInvoiceDao(dbi, nextBillingDatePoster, bus, clock, controllerDispatcher);
         invoiceDao.test(internalCallContext);
 
         invoiceItemSqlDao = dbi.onDemand(InvoiceItemSqlDao.class);

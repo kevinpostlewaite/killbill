@@ -24,8 +24,10 @@ import org.skife.jdbi.v2.IDBI;
 import com.ning.billing.ErrorCode;
 import com.ning.billing.ObjectType;
 import com.ning.billing.util.api.CustomFieldApiException;
+import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.callcontext.InternalCallContext;
 import com.ning.billing.util.callcontext.InternalTenantContext;
+import com.ning.billing.util.clock.Clock;
 import com.ning.billing.util.customfield.CustomField;
 import com.ning.billing.util.entity.dao.EntityDaoBase;
 import com.ning.billing.util.entity.dao.EntitySqlDao;
@@ -38,8 +40,8 @@ import com.google.inject.Inject;
 public class DefaultCustomFieldDao extends EntityDaoBase<CustomFieldModelDao, CustomField, CustomFieldApiException> implements CustomFieldDao {
 
     @Inject
-    public DefaultCustomFieldDao(final IDBI dbi) {
-        super(new EntitySqlDaoTransactionalJdbiWrapper(dbi), CustomFieldSqlDao.class);
+    public DefaultCustomFieldDao(final IDBI dbi, final Clock clock, final CacheControllerDispatcher controllerDispatcher) {
+        super(new EntitySqlDaoTransactionalJdbiWrapper(dbi, clock, controllerDispatcher), CustomFieldSqlDao.class);
     }
 
     @Override

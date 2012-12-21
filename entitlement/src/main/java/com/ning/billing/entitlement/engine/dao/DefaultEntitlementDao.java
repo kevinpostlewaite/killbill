@@ -70,6 +70,7 @@ import com.ning.billing.entitlement.events.user.ApiEventChange;
 import com.ning.billing.entitlement.events.user.ApiEventMigrateBilling;
 import com.ning.billing.entitlement.events.user.ApiEventType;
 import com.ning.billing.entitlement.exceptions.EntitlementError;
+import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.callcontext.InternalCallContext;
 import com.ning.billing.util.callcontext.InternalTenantContext;
 import com.ning.billing.util.clock.Clock;
@@ -105,9 +106,10 @@ public class DefaultEntitlementDao implements EntitlementDao {
 
     @Inject
     public DefaultEntitlementDao(final IDBI dbi, final Clock clock, final AddonUtils addonUtils,
-                                 final NotificationQueueService notificationQueueService, final InternalBus eventBus, final CatalogService catalogService) {
+                                 final NotificationQueueService notificationQueueService, final InternalBus eventBus, final CatalogService catalogService,
+                                 final CacheControllerDispatcher cacheControllerDispatcher) {
         this.clock = clock;
-        this.transactionalSqlDao = new EntitySqlDaoTransactionalJdbiWrapper(dbi);
+        this.transactionalSqlDao = new EntitySqlDaoTransactionalJdbiWrapper(dbi, clock, cacheControllerDispatcher);
         this.notificationQueueService = notificationQueueService;
         this.addonUtils = addonUtils;
         this.eventBus = eventBus;

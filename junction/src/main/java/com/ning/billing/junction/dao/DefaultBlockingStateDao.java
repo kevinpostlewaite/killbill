@@ -27,6 +27,7 @@ import org.skife.jdbi.v2.IDBI;
 
 import com.ning.billing.junction.api.Blockable;
 import com.ning.billing.junction.api.BlockingState;
+import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.callcontext.InternalCallContext;
 import com.ning.billing.util.callcontext.InternalTenantContext;
 import com.ning.billing.util.clock.Clock;
@@ -43,8 +44,8 @@ public class DefaultBlockingStateDao implements BlockingStateDao {
     private final EntitySqlDaoTransactionalJdbiWrapper transactionalSqlDao;
 
     @Inject
-    public DefaultBlockingStateDao(final IDBI dbi) {
-        this.transactionalSqlDao = new EntitySqlDaoTransactionalJdbiWrapper(dbi);
+    public DefaultBlockingStateDao(final IDBI dbi, final Clock clock, final CacheControllerDispatcher cacheControllerDispatcher) {
+        this.transactionalSqlDao = new EntitySqlDaoTransactionalJdbiWrapper(dbi, clock, cacheControllerDispatcher);
     }
 
     @Override

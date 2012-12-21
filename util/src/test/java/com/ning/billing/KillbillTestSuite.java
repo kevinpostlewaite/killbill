@@ -25,6 +25,7 @@ import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
+import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.callcontext.CallContext;
 import com.ning.billing.util.callcontext.CallOrigin;
 import com.ning.billing.util.callcontext.InternalCallContext;
@@ -40,7 +41,7 @@ public class KillbillTestSuite {
 
     private boolean hasFailed = false;
 
-    private Clock clock = new ClockMock();
+    protected Clock clock = new ClockMock();
 
     protected final InternalCallContext internalCallContext = new InternalCallContext(InternalCallContextFactory.INTERNAL_TENANT_RECORD_ID, 1687L, UUID.randomUUID(),
                                                                                       UUID.randomUUID().toString(), CallOrigin.TEST,

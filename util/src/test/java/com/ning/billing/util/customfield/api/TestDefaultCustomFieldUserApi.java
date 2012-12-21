@@ -29,6 +29,7 @@ import org.testng.annotations.Test;
 
 import com.ning.billing.ObjectType;
 import com.ning.billing.util.UtilTestSuiteWithEmbeddedDB;
+import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.callcontext.InternalCallContextFactory;
 import com.ning.billing.util.clock.ClockMock;
 import com.ning.billing.util.customfield.CustomField;
@@ -42,10 +43,12 @@ public class TestDefaultCustomFieldUserApi extends UtilTestSuiteWithEmbeddedDB {
 
     private DefaultCustomFieldUserApi customFieldUserApi;
 
+    private CacheControllerDispatcher controllerDispatcher = new CacheControllerDispatcher();
+
     @BeforeMethod(groups = "slow")
     public void setUp() throws Exception {
         final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(getDBI(), new ClockMock());
-        final CustomFieldDao customFieldDao = new DefaultCustomFieldDao(getDBI());
+        final CustomFieldDao customFieldDao = new DefaultCustomFieldDao(getDBI(), clock, controllerDispatcher);
         customFieldUserApi = new DefaultCustomFieldUserApi(internalCallContextFactory, customFieldDao);
     }
 

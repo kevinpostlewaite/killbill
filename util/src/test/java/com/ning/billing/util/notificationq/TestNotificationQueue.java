@@ -34,6 +34,7 @@ import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
 import com.ning.billing.util.UtilTestSuiteWithEmbeddedDB;
+import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.clock.Clock;
 import com.ning.billing.util.clock.ClockMock;
 import com.ning.billing.util.entity.dao.EntitySqlDao;
@@ -72,6 +73,9 @@ public class TestNotificationQueue extends UtilTestSuiteWithEmbeddedDB {
     @Inject
     NotificationQueueService queueService;
 
+    @Inject
+    CacheControllerDispatcher controllerDispatcher;
+
     private int eventsReceived;
 
     private static final class TestNotificationKey implements NotificationKey, Comparable<TestNotificationKey> {
@@ -105,7 +109,7 @@ public class TestNotificationQueue extends UtilTestSuiteWithEmbeddedDB {
     public void setup() throws Exception {
         final String testDdl = IOUtils.toString(NotificationSqlDao.class.getResourceAsStream("/com/ning/billing/util/ddl_test.sql"));
         helper.initDb(testDdl);
-        entitySqlDaoTransactionalJdbiWrapper = new EntitySqlDaoTransactionalJdbiWrapper(dbi);
+        entitySqlDaoTransactionalJdbiWrapper = new EntitySqlDaoTransactionalJdbiWrapper(dbi, clock, controllerDispatcher);
     }
 
     @BeforeTest(groups = "slow")

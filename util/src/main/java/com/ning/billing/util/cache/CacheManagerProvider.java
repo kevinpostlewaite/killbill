@@ -17,11 +17,9 @@
 package com.ning.billing.util.cache;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.management.MBeanServer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,20 +27,17 @@ import org.slf4j.LoggerFactory;
 import com.ning.billing.util.config.CacheConfig;
 
 import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.management.ManagementService;
 
 public class CacheManagerProvider implements Provider<CacheManager> {
 
     private static final Logger log = LoggerFactory.getLogger(CacheManagerProvider.class);
 
-    /* private final MBeanServer mbeanServer; */
     private final CacheConfig cacheConfig;
 
     private CacheManager cacheManager = null;
 
     @Inject
-    public CacheManagerProvider(/* final MBeanServer mbeanServer, */ final CacheConfig cacheConfig) {
-        /* this.mbeanServer = mbeanServer; */
+    public CacheManagerProvider(final CacheConfig cacheConfig) {
         this.cacheConfig = cacheConfig;
     }
 
@@ -53,11 +48,11 @@ public class CacheManagerProvider implements Provider<CacheManager> {
                 log.debug("Loading EHCache config from '%s'", cacheConfig.getCacheConfigLocation());
 
                 try {
-                    this.cacheManager = new CacheManager(CacheManagerProvider.class.getResource(cacheConfig.getCacheConfigLocation()).openStream());
+                    // Creates a singleton instance of the CacheManager
+                    this.cacheManager = CacheManager.create(CacheManagerProvider.class.getResource(cacheConfig.getCacheConfigLocation()).openStream());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                /* ManagementService.registerMBeans(cacheManager, mbeanServer, false, true, true, true); */
             }
             return this.cacheManager;
         }

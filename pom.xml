@@ -37,6 +37,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j.version>1.6.5</slf4j.version>
+        <ehcache.version>2.6.2</ehcache.version>
     </properties>
     <modules>
         <module>account</module>
@@ -60,8 +61,9 @@
         <dependencies>
             <dependency>
                 <groupId>net.sf.ehcache</groupId>
-                <artifactId>ehcache</artifactId>
-                <version>1.6.2-NING-12617</version>
+                <artifactId>ehcache-core</artifactId>
+                <version>${ehcache.version}</version>
+                <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>javax.ws.rs</groupId>

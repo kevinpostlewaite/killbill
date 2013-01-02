@@ -28,4 +28,6 @@ public interface CacheController<K, V> {
     public V get(K key, ObjectType objectType);
 
     public boolean remove(K key);
+
+    public int size();
 }

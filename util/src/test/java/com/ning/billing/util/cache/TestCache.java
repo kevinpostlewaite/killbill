@@ -16,19 +16,98 @@
 
 package com.ning.billing.util.cache;
 
+import java.util.UUID;
+
+import javax.inject.Inject;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
+import com.ning.billing.ObjectType;
 import com.ning.billing.mock.glue.MockDbHelperModule;
 import com.ning.billing.util.UtilTestSuiteWithEmbeddedDB;
+import com.ning.billing.util.cache.Cachable.CacheType;
+import com.ning.billing.util.dao.TableName;
+import com.ning.billing.util.entity.Entity;
+import com.ning.billing.util.entity.EntityBase;
+import com.ning.billing.util.entity.dao.EntityModelDao;
+import com.ning.billing.util.entity.dao.EntitySqlDao;
+import com.ning.billing.util.entity.dao.EntitySqlDaoStringTemplate;
+import com.ning.billing.util.entity.dao.EntitySqlDaoTransactionWrapper;
+import com.ning.billing.util.entity.dao.EntitySqlDaoTransactionalJdbiWrapper;
+import com.ning.billing.util.entity.dao.EntitySqlDaoWrapperFactory;
 import com.ning.billing.util.glue.CacheModule;
 import com.ning.billing.util.glue.ClockModule;
+import com.ning.billing.util.tag.dao.TagModelDao;
+import com.ning.billing.util.tag.dao.TagSqlDao;
 
 @Guice(modules = {ClockModule.class, CacheModule.class, MockDbHelperModule.class} )
 public class TestCache extends UtilTestSuiteWithEmbeddedDB {
 
-    @Test(groups = "slow", enabled=false)
-    public void test() {
+    @Inject
+    private CacheControllerDispatcher controlCacheDispatcher;
 
+    private  EntitySqlDaoTransactionalJdbiWrapper transactionalSqlDao;
+
+
+    private void insertTag(final TagModelDao modelDao) {
+        transactionalSqlDao.execute(new EntitySqlDaoTransactionWrapper<Void>() {
+            @Override
+            public Void inTransaction(final EntitySqlDaoWrapperFactory<EntitySqlDao> entitySqlDaoWrapperFactory) throws Exception {
+                entitySqlDaoWrapperFactory.become(TagSqlDao.class).create(modelDao, internalCallContext);
+                return null;
+            }
+        });
+    }
+
+    private Long getTagRecordId(final UUID tagId) {
+        return transactionalSqlDao.execute(new EntitySqlDaoTransactionWrapper<Long>() {
+            @Override
+            public Long inTransaction(final EntitySqlDaoWrapperFactory<EntitySqlDao> entitySqlDaoWrapperFactory) throws Exception {
+                return entitySqlDaoWrapperFactory.become(TagSqlDao.class).getRecordId(tagId.toString(), internalCallContext);
+            }
+        });
+    }
+
+    private int getCacheSize() {
+        final CacheController<Object, Object> cache = controlCacheDispatcher.getCacheController(CacheType.RECORD_ID);
+        return cache != null ? cache.size() : 0;
+    }
+
+    private Long retrieveRecordIdFromCache(UUID tagId) {
+        final CacheController<Object, Object> cache = controlCacheDispatcher.getCacheController(CacheType.RECORD_ID);
+        Object result = null;
+        if (cache != null) {
+            result =  cache.get(tagId.toString(), ObjectType.TAG);
+        }
+        return (Long) result;
+    }
+
+    @Test(groups = "slow")
+    public void testCacheRecordId() throws Exception {
+
+        this.transactionalSqlDao = new EntitySqlDaoTransactionalJdbiWrapper(getDBI(), clock, controlCacheDispatcher);
+        final TagModelDao tag = new TagModelDao(clock.getUTCNow(), UUID.randomUUID(), UUID.randomUUID(), ObjectType.TAG);
+
+        // Verify we start with nothing in the cache
+        Assert.assertEquals(getCacheSize(), 0);
+        insertTag(tag);
+
+        // Verify we still have nothing after insert in the cache
+        Assert.assertEquals(getCacheSize(), 0);
+
+        final Long tagRecordId = getTagRecordId(tag.getId());
+        // Verify we now have something  in the cache
+        Assert.assertEquals(getCacheSize(), 1);
+
+        final Long recordIdFromCache = retrieveRecordIdFromCache(tag.getId());
+        Assert.assertNotNull(recordIdFromCache);
+
+        Assert.assertEquals(recordIdFromCache, new Long(1));
+        Assert.assertEquals(tagRecordId, new Long(1));
+
+        Assert.assertEquals(getCacheSize(), 1);
     }
 }

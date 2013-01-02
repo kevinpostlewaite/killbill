@@ -53,4 +53,9 @@ public class EhCacheBasedCacheController<K, V> implements CacheController<K, V> 
     public boolean remove(final K key) {
         return cache.remove(key);
     }
+
+    @Override
+    public int size() {
+        return cache.getSize();
+    }
 }

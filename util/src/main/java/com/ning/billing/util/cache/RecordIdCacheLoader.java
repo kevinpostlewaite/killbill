@@ -58,12 +58,12 @@ public class RecordIdCacheLoader implements CacheLoader {
             throw new IllegalArgumentException("Unexpected argument type of " +
                                                argument != null ? argument.getClass().getName() : "null");
         }
-        if (!(key instanceof UUID)) {
+        if (!(key instanceof String)) {
             throw new IllegalArgumentException("Unexpected key type of " +
                                                key != null ? key.getClass().getName() : "null");
 
         }
-        final UUID objectId = (UUID) key;
+        final String objectId = (String) key;
         final ObjectType objectType = (ObjectType) argument;
         Long value = retrieveRecordIdFromIdAndType(objectId, objectType);
         return value;
@@ -111,7 +111,7 @@ public class RecordIdCacheLoader implements CacheLoader {
     }
 
 
-    private Long retrieveRecordIdFromIdAndType(final UUID objectId, final ObjectType objectType) {
+    private Long retrieveRecordIdFromIdAndType(final String objectId, final ObjectType objectType) {
 
         final Long recordId;
 
@@ -121,7 +121,7 @@ public class RecordIdCacheLoader implements CacheLoader {
                 @Override
                 public Long withHandle(final Handle handle) throws Exception {
 
-                    final List<Map<String, Object>> values = handle.select(String.format("select record_id from %s where id = ?;", tableName.getTableName()), objectId.toString());
+                    final List<Map<String, Object>> values = handle.select(String.format("select record_id from %s where id = ?;", tableName.getTableName()), objectId);
                     if (values.size() == 0) {
                         return null;
                     } else {

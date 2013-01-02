@@ -62,6 +62,7 @@ import com.ning.billing.util.email.templates.TemplateModule;
 import com.ning.billing.util.globallocker.TestGlobalLockerModule;
 import com.ning.billing.util.glue.AuditModule;
 import com.ning.billing.util.glue.BusModule;
+import com.ning.billing.util.glue.CacheModule;
 import com.ning.billing.util.glue.CallContextModule;
 import com.ning.billing.util.glue.CustomFieldModule;
 import com.ning.billing.util.glue.NotificationQueueModule;
@@ -99,6 +100,7 @@ public class BeatrixIntegrationModule extends AbstractModule {
         }
         bind(IDBI.class).toInstance(dbi);
 
+        install(new CacheModule());
         install(new EmailModule());
         install(new CallContextModule());
         install(new TestGlobalLockerModule(helper));

@@ -20,6 +20,7 @@ import com.ning.billing.catalog.glue.CatalogModule;
 import com.ning.billing.junction.glue.DefaultJunctionModule;
 import com.ning.billing.mock.glue.MockClockModule;
 import com.ning.billing.mock.glue.MockDbHelperModule;
+import com.ning.billing.util.glue.CacheModule;
 import com.ning.billing.util.glue.CallContextModule;
 
 public class MockModule extends DefaultJunctionModule {
@@ -31,6 +32,7 @@ public class MockModule extends DefaultJunctionModule {
         install(new MockDbHelperModule());
         install(new CallContextModule());
         install(new CatalogModule());
+        install(new CacheModule());
     }
 
     @Override

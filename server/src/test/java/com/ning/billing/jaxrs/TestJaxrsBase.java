@@ -62,6 +62,7 @@ import com.ning.billing.util.email.templates.TemplateModule;
 import com.ning.billing.util.globallocker.TestGlobalLockerModule;
 import com.ning.billing.util.glue.AuditModule;
 import com.ning.billing.util.glue.BusModule;
+import com.ning.billing.util.glue.CacheModule;
 import com.ning.billing.util.glue.CallContextModule;
 import com.ning.billing.util.glue.CustomFieldModule;
 import com.ning.billing.util.glue.ExportModule;
@@ -166,6 +167,7 @@ public class TestJaxrsBase extends KillbillClient {
             Modules.override(new com.ning.billing.payment.setup.PaymentModule()).with(new PaymentMockModule());
             */
             install(new EmailModule());
+            install(new CacheModule());
             install(new TestGlobalLockerModule(helper));
             install(new CustomFieldModule());
             install(new TagStoreModule());

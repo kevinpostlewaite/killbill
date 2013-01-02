@@ -58,6 +58,7 @@ import com.ning.billing.util.callcontext.InternalTenantContext;
 import com.ning.billing.util.clock.ClockMock;
 import com.ning.billing.util.email.EmailModule;
 import com.ning.billing.util.email.templates.TemplateModule;
+import com.ning.billing.util.glue.CacheModule;
 import com.ning.billing.util.glue.CallContextModule;
 import com.ning.billing.util.glue.NotificationQueueModule;
 import com.ning.billing.util.notificationq.NotificationQueueService.NotificationQueueAlreadyExists;
@@ -71,7 +72,8 @@ import com.google.inject.Inject;
 
 @Guice(modules = {DefaultOverdueModule.class, OverdueListenerTesterModule.class, MockClockModule.class, ApplicatorMockJunctionModule.class,
                   CallContextModule.class, CatalogModule.class, MockInvoiceModule.class, MockPaymentModule.class, NotificationQueueModule.class,
-                  EmailModule.class, TemplateModule.class, TestDbiModule.class, MockEntitlementModule.class, MockInvoiceModule.class, MockAccountModule.class})
+                  EmailModule.class, TemplateModule.class, TestDbiModule.class, MockEntitlementModule.class, MockInvoiceModule.class,
+        MockAccountModule.class, CacheModule.class})
 public abstract class OverdueTestBase extends OverdueTestSuiteWithEmbeddedDB {
     protected final String configXml =
             "<overdueConfig>" +

@@ -64,6 +64,7 @@ import com.ning.billing.util.email.templates.TemplateModule;
 import com.ning.billing.util.globallocker.GlobalLocker;
 import com.ning.billing.util.globallocker.MySqlGlobalLocker;
 import com.ning.billing.util.glue.BusModule;
+import com.ning.billing.util.glue.CacheModule;
 import com.ning.billing.util.glue.NotificationQueueModule;
 import com.ning.billing.util.notificationq.NotificationQueueService;
 import com.ning.billing.util.svcapi.account.AccountInternalApi;
@@ -134,6 +135,7 @@ public class TestOverdueCheckNotifier extends OverdueTestSuiteWithEmbeddedDB {
                 install(new EmailModule());
                 install(new TemplateModule());
                 install(new NotificationQueueModule());
+                install(new CacheModule());
                 final AccountInternalApi accountApi = Mockito.mock(AccountInternalApi.class);
                 bind(AccountInternalApi.class).toInstance(accountApi);
 

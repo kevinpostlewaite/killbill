@@ -42,6 +42,7 @@ import com.ning.billing.util.email.EmailModule;
 import com.ning.billing.util.email.templates.TemplateModule;
 import com.ning.billing.util.globallocker.TestGlobalLockerModule;
 import com.ning.billing.util.glue.BusModule;
+import com.ning.billing.util.glue.CacheModule;
 import com.ning.billing.util.glue.CustomFieldModule;
 import com.ning.billing.util.glue.NotificationQueueModule;
 import com.ning.billing.util.glue.TagStoreModule;
@@ -64,6 +65,7 @@ public class MockModule extends AbstractModule {
         bind(CallContextFactory.class).to(DefaultCallContextFactory.class).asEagerSingleton();
         install(new TagStoreModule());
         install(new CustomFieldModule());
+        install(new CacheModule());
 
         final DBTestingHelper helper = KillbillTestSuiteWithEmbeddedDB.getDBTestingHelper();
         if (helper.isUsingLocalInstance()) {

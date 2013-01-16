@@ -50,6 +50,8 @@ import com.ning.billing.invoice.api.InvoiceService;
 import com.ning.billing.invoice.glue.DefaultInvoiceModule;
 import com.ning.billing.junction.glue.DefaultJunctionModule;
 import com.ning.billing.lifecycle.KillbillService;
+import com.ning.billing.osgi.DefaultOSGIService;
+import com.ning.billing.osgi.glue.DefaultOSGIModule;
 import com.ning.billing.overdue.OverdueService;
 import com.ning.billing.payment.api.PaymentService;
 import com.ning.billing.payment.glue.PaymentModule;
@@ -117,6 +119,8 @@ public class BeatrixIntegrationModule extends AbstractModule {
         install(new IntegrationTestOverdueModule());
         install(new AuditModule());
 
+        install(new DefaultOSGIModule());
+
         bind(AccountChecker.class).asEagerSingleton();
         bind(EntitlementChecker.class).asEagerSingleton();
         bind(InvoiceChecker.class).asEagerSingleton();
@@ -168,6 +172,7 @@ public class BeatrixIntegrationModule extends AbstractModule {
                     .add(injector.getInstance(PaymentService.class))
                     .add(injector.getInstance(OverdueService.class))
                     .add(injector.getInstance(DefaultBeatrixService.class))
+                    .add(injector.getInstance(DefaultOSGIService.class))
                     .build();
             return services;
         }

@@ -59,7 +59,7 @@ public class KillbillTestSuiteWithEmbeddedDB extends KillbillTestSuite {
     public void startMysqlBeforeTestSuite() throws IOException, ClassNotFoundException, SQLException, URISyntaxException {
         helper.start();
         helper.initDb();
-        helper.cleanupAllTables();
+       // helper.cleanupAllTables();
     }
 
     @BeforeMethod(groups = {"slow", "mysql"})

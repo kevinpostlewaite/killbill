@@ -14,11 +14,13 @@
  * under the License.
  */
 
-package com.ning.billing.osgi;
+package com.ning.billing.osgi.glue;
 
-public class TestFoo {
+import com.google.inject.AbstractModule;
 
-    public static void main(String [] args) {
-        System.out.println("YO");
+public class DefaultOSGIModule extends AbstractModule {
+
+    @Override
+    protected void configure() {
     }
 }

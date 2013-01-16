@@ -48,6 +48,7 @@
         <module>invoice</module>
         <module>junction</module>
         <module>meter</module>
+        <module>osgi-jruby-bundle</module>
         <module>overdue</module>
         <module>payment</module>
         <module>usage</module>
@@ -213,6 +214,11 @@
             </dependency>
             <dependency>
                 <groupId>com.ning.billing</groupId>
+                <artifactId>killbill-osgi-jruby-bundle</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ning.billing</groupId>
                 <artifactId>killbill-overdue</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -331,6 +337,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-email</artifactId>
                 <version>1.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>5.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.shiro</groupId>
@@ -558,6 +569,8 @@
                                 <!-- exclude mustache template files -->
                                 <exclude>**/*.mustache</exclude>
                                 <exclude>examples/**</exclude>
+                                <exclude>Gemfile.lock</exclude>
+                                <exclude>src/main/ruby/kbadmin/**</exclude>
                             </excludes>
                         </configuration>
                     </execution>

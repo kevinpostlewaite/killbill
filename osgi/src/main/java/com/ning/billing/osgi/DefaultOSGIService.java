@@ -16,6 +16,8 @@
 
 package com.ning.billing.osgi;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -38,19 +40,11 @@ import com.ning.billing.beatrix.bus.api.ExternalBus;
 import com.ning.billing.lifecycle.LifecycleHandlerType;
 import com.ning.billing.lifecycle.LifecycleHandlerType.LifecycleLevel;
 import com.ning.billing.osgi.api.OSGIService;
-import com.ning.billing.payment.plugin.api.PaymentPluginApi;
+import com.ning.billing.util.config.OSGIConfig;
 
 public class DefaultOSGIService implements OSGIService {
 
     public static final String OSGI_SERVICE_NAME = "osgi-service";
-
-
-    private final static String HELLO_WORLD_BUNDLE =
-            "file:/Users/stephanebrossier/Work/OpenSource/killbill/killbill/osgi-bundles//target/killbill-osgi-bundles-0.1.51-SNAPSHOT.jar";
-
-
-    private final static String EVENT_ADMIN_BUNDLE =
-            "file:/Users/stephanebrossier/.m2/repository/org/apache/felix/org.apache.felix.eventadmin/1.3.2/org.apache.felix.eventadmin-1.3.2.jar";
 
     private final static Logger logger = LoggerFactory.getLogger(DefaultOSGIService.class);
 
@@ -60,12 +54,13 @@ public class DefaultOSGIService implements OSGIService {
 
     private final AccountUserApi accountUserApi;
     private final ExternalBus externalBus;
+    private final OSGIConfig osgiConfig;
 
     @Inject
-    public DefaultOSGIService(final AccountUserApi accountUserApi, final ExternalBus externalBus) {
+    public DefaultOSGIService(final OSGIConfig osgiConfig, final AccountUserApi accountUserApi, final ExternalBus externalBus) {
         this.accountUserApi = accountUserApi;
         this.externalBus = externalBus;
-
+        this.osgiConfig = osgiConfig;
         this.killbillActivator = null;
         this.framework = null;
 
@@ -76,15 +71,18 @@ public class DefaultOSGIService implements OSGIService {
         return OSGI_SERVICE_NAME;
     }
 
-
     @LifecycleHandlerType(LifecycleLevel.INIT_SERVICE)
     public void initialize() {
         try {
 
-            // STEPH Prune the existing felix bundle cache
+            // We start by deleting existing osi cache; we might optimize later keeping the cache
+            pruneOSGICache();
+
+            // Create the system bundle for killbill and start the framework
             this.framework = createAndInitFramework();
             framework.start();
 
+            // This will call the start() method for the bundles
             installAndStartBundles(framework);
 
         } catch (BundleException e) {
@@ -94,9 +92,6 @@ public class DefaultOSGIService implements OSGIService {
 
     @LifecycleHandlerType(LifecycleLevel.START_SERVICE)
     public void startFramework() {
-        PaymentPluginApi pluginApi = killbillActivator.getPaymentPluginApiForPlugin("hello");
-        final String name = pluginApi.getName();
-        System.out.println("name = " + name);
     }
 
     @LifecycleHandlerType(LifecycleHandlerType.LifecycleLevel.REGISTER_EVENTS)
@@ -123,48 +118,89 @@ public class DefaultOSGIService implements OSGIService {
 
 
     private void installAndStartBundles(final Framework framework) throws BundleException {
-        final BundleContext context = framework.getBundleContext();
-        List<Bundle> installedBundles = new LinkedList<Bundle>();
 
-        installedBundles.add(context.installBundle(HELLO_WORLD_BUNDLE));
-        installedBundles.add(context.installBundle(EVENT_ADMIN_BUNDLE));
+        final BundleContext context = framework.getBundleContext();
+
+        // Install the bundles
+        List<Bundle> installedBundles = new LinkedList<Bundle>();
+        for (String bundlePath : lookupInstalledBundles()) {
+            installedBundles.add(context.installBundle(bundlePath));
+        }
+
+        // Start all the bundles
         for (Bundle bundle : installedBundles) {
             bundle.start();
         }
     }
 
+    private String[] lookupInstalledBundles() {
+
+        final List<String> result = new LinkedList<String>();
+        final File bundleInstallationDir = new File(osgiConfig.getBundleInstallationDir());
+        for (File f : bundleInstallationDir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(final File dir, final String name) {
+                return name.endsWith(".jar");
+            }
+        })) {
+            result.add("file:" + f.getAbsolutePath());
+        }
+        return result.toArray(new String[result.size()]);
+    }
+
+
     private Framework createAndInitFramework() throws BundleException {
 
         final Map<String, String> config = new HashMap<String, String>();
-
-        // STEPH export all KB Apis.
-        final StringBuilder tmp = new StringBuilder()
-                .append("com.ning.billing.account.api,")
-                .append("com.ning.billing.beatrix.bus.api,")
-                .append("com.ning.billing.payment.plugin.api,")
-                .append("com.ning.billing.util.callcontext,")
-                .append("com.google.common.eventbus");
-
-        config.put("org.osgi.framework.system.packages.extra", tmp.toString());
-        config.put("felix.cache.rootdir", "/var/tmp/felix");
-        config.put("org.osgi.framework.storage", "osgi-cache");
-
+        config.put("org.osgi.framework.system.packages.extra", osgiConfig.getSystemBundleExportPackages());
+        config.put("felix.cache.rootdir", osgiConfig.getRootDir());
+        config.put("org.osgi.framework.storage", osgiConfig.getBundleCacheName());
         return createAndInitFelixFrameworkWithSystemBundle(config);
     }
 
 
     private Framework createAndInitFelixFrameworkWithSystemBundle(Map<String, String> config) throws BundleException {
 
-
-        Map<Object, Object> felixConfig = new HashMap<Object, Object>();
+        // From standard properties add Felix specific property to add a System bundle activator
+        final Map<Object, Object> felixConfig = new HashMap<Object, Object>();
         felixConfig.putAll(config);
 
+        // Create the system bundle activator that will register the required services for Killbill
         this.killbillActivator = new KillbillActivator(accountUserApi, externalBus);
-
         felixConfig.put(FelixConstants.SYSTEMBUNDLE_ACTIVATORS_PROP, Collections.singletonList(killbillActivator));
 
         Framework felix = new Felix(felixConfig);
         felix.init();
         return felix;
     }
+
+
+    private void pruneOSGICache() {
+        final String path = osgiConfig.getRootDir() + "/" + osgiConfig.getBundleCacheName();
+        deleteUnderDirectory(new File(path));
+    }
+
+    static private void deleteUnderDirectory(File path) {
+        deleteDirectory(path, false);
+    }
+
+    static private void deleteDirectory(final File path, final boolean deleteParent) {
+        if (path == null) {
+            return;
+        }
+        if (path.exists()) {
+            for (File f : path.listFiles()) {
+                if (f.isDirectory()) {
+                    deleteDirectory(f, true);
+                    f.delete();
+                } else {
+                    f.delete();
+                }
+            }
+            if (deleteParent) {
+                path.delete();
+            }
+        }
+    }
+
 }

@@ -16,11 +16,21 @@
 
 package com.ning.billing.osgi.glue;
 
+import org.skife.config.ConfigurationObjectFactory;
+
+import com.ning.billing.util.config.OSGIConfig;
+
 import com.google.inject.AbstractModule;
 
 public class DefaultOSGIModule extends AbstractModule {
 
+
+    protected void installConfig() {
+        final OSGIConfig config = new ConfigurationObjectFactory(System.getProperties()).build(OSGIConfig.class);
+        bind(OSGIConfig.class).toInstance(config);
+    }
     @Override
     protected void configure() {
+        installConfig();
     }
 }

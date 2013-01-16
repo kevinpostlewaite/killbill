@@ -79,6 +79,7 @@ public class KillbillActivator implements BundleActivator {
         } catch (InvalidSyntaxException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         } finally {
+            //context.ungetService(paymentApiReferences[0]);
             // STEPH TODO leak reference here
         }
         return null;

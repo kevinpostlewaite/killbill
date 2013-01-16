@@ -119,8 +119,6 @@ public class BeatrixIntegrationModule extends AbstractModule {
         install(new IntegrationTestOverdueModule());
         install(new AuditModule());
 
-        install(new DefaultOSGIModule());
-
         bind(AccountChecker.class).asEagerSingleton();
         bind(EntitlementChecker.class).asEagerSingleton();
         bind(InvoiceChecker.class).asEagerSingleton();
@@ -172,7 +170,6 @@ public class BeatrixIntegrationModule extends AbstractModule {
                     .add(injector.getInstance(PaymentService.class))
                     .add(injector.getInstance(OverdueService.class))
                     .add(injector.getInstance(DefaultBeatrixService.class))
-                    .add(injector.getInstance(DefaultOSGIService.class))
                     .build();
             return services;
         }

@@ -23,6 +23,7 @@ import org.jruby.Ruby;
 import org.jruby.RubyObject;
 import org.jruby.embed.EvalFailedException;
 import org.jruby.embed.ScriptingContainer;
+import org.osgi.framework.BundleContext;
 
 // Bridge between the OSGI bundle and the ruby plugin
 public abstract class JRubyPlugin {
@@ -64,13 +65,13 @@ public abstract class JRubyPlugin {
         pluginInstance = (RubyObject) container.runScriptlet(pluginMainClass + ".new(" + JAVA_APIS + ")");
     }
 
-    public void startPlugin() {
+    public void startPlugin(final BundleContext context) {
         checkPluginIsStopped();
         pluginInstance.callMethod("start_plugin");
         checkPluginIsRunning();
     }
 
-    public void stopPlugin() {
+    public void stopPlugin(final BundleContext context) {
         checkPluginIsRunning();
         pluginInstance.callMethod("stop_plugin");
         checkPluginIsStopped();

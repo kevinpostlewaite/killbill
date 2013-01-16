@@ -17,15 +17,42 @@
 package com.ning.billing.osgi.jruby;
 
 import org.jruby.javasupport.JavaEmbedUtils;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ning.billing.beatrix.bus.api.ExtBusEvent;
+import com.ning.billing.beatrix.bus.api.ExternalBus;
+
+import com.google.common.eventbus.Subscribe;
 
 public class JRubyNotificationPlugin extends JRubyPlugin {
+
+    private final Logger logger = LoggerFactory.getLogger(JRubyNotificationPlugin.class);
 
     public JRubyNotificationPlugin(final String pluginMainClass, final String pluginLibdir) {
         super(pluginMainClass, pluginLibdir);
     }
 
+    @Override
+    public void startPlugin(final BundleContext context) {
+        super.startPlugin(context);
+
+        final ServiceReference<ExternalBus> externalBusReference = (ServiceReference) context.getServiceReference(ExternalBus.class.getName());
+        try {
+            final ExternalBus externalBus = context.getService(externalBusReference);
+            externalBus.register(this);
+        } catch (Exception e) {
+            logger.warn("Error registering notification plugin service", e);
+        } finally {
+            if (externalBusReference != null) {
+                context.ungetService(externalBusReference);
+            }
+        }
+    }
+
+    @Subscribe
     public void onEvent(final ExtBusEvent event) {
         checkValidNotificationPlugin();
         checkPluginIsRunning();

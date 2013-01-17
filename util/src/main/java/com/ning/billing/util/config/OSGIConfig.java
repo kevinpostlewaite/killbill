@@ -23,18 +23,23 @@ public interface OSGIConfig extends KillbillConfig {
 
     @Config("killbill.osgi.root.dir")
     @Default("/var/tmp/felix")
-    public String getRootDir();
+    public String getOSGIBundleRootDir();
 
     @Config("killbill.osgi.bundle.cache.name")
     @Default("osgi-cache")
-    public String getBundleCacheName();
+    public String getOSGIBundleCacheName();
 
 
     @Config("killbill.osgi.bundle.install.dir")
     @Default("/var/tmp/bundles")
-    public String getBundleInstallationDir();
+    public String getRootInstallationDir();
 
     @Config("killbill.osgi.system.bundle.export.packages")
-    @Default("com.ning.billing.account.api,com.ning.billing.beatrix.bus.api,com.ning.billing.payment.plugin.api,com.ning.billing.util.callcontext,com.google.common.eventbus")
+    @Default("com.ning.billing.account.api,com.ning.billing.beatrix.bus.api,com.ning.billing.payment.plugin.api,com.ning.billing.osgi.api.config,com.ning.billing.util.callcontext,com.google.common.eventbus")
     public String getSystemBundleExportPackages();
+
+    @Config("killbill.osgi.jruby.bundle.path")
+    @Default("/var/tmp/killbill-osgi-jruby-bundle-0.1.51-SNAPSHOT-jar-with-dependencies.jar")
+    public String getJrubyBundlePath();
+
 }

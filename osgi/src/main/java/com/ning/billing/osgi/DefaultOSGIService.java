@@ -40,28 +40,37 @@ import com.ning.billing.beatrix.bus.api.ExternalBus;
 import com.ning.billing.lifecycle.LifecycleHandlerType;
 import com.ning.billing.lifecycle.LifecycleHandlerType.LifecycleLevel;
 import com.ning.billing.osgi.api.OSGIService;
+import com.ning.billing.osgi.api.config.PluginConfigServiceApi;
+import com.ning.billing.osgi.api.config.PluginRubyConfig;
+import com.ning.billing.osgi.pluginconf.DefaultPluginConfigServiceApi;
+import com.ning.billing.osgi.pluginconf.PluginConfigException;
+import com.ning.billing.osgi.pluginconf.PluginFinder;
 import com.ning.billing.util.config.OSGIConfig;
 
 public class DefaultOSGIService implements OSGIService {
 
     public static final String OSGI_SERVICE_NAME = "osgi-service";
 
+
     private final static Logger logger = LoggerFactory.getLogger(DefaultOSGIService.class);
 
 
-    private KillbillActivator killbillActivator;
     private Framework framework;
 
     private final AccountUserApi accountUserApi;
-    private final ExternalBus externalBus;
     private final OSGIConfig osgiConfig;
+    private final PluginFinder pluginFinder;
+    private final PluginConfigServiceApi pluginConfigServiceApi;
+    private final KillbillActivator killbillActivator;
 
     @Inject
-    public DefaultOSGIService(final OSGIConfig osgiConfig, final AccountUserApi accountUserApi, final ExternalBus externalBus) {
+    public DefaultOSGIService(final OSGIConfig osgiConfig, final PluginFinder pluginFinder, final AccountUserApi accountUserApi,
+                              final PluginConfigServiceApi pluginConfigServiceApi, final KillbillActivator killbillActivator) {
         this.accountUserApi = accountUserApi;
-        this.externalBus = externalBus;
         this.osgiConfig = osgiConfig;
-        this.killbillActivator = null;
+        this.pluginFinder = pluginFinder;
+        this.pluginConfigServiceApi = pluginConfigServiceApi;
+        this.killbillActivator = killbillActivator;
         this.framework = null;
 
     }
@@ -90,18 +99,17 @@ public class DefaultOSGIService implements OSGIService {
         }
     }
 
+
     @LifecycleHandlerType(LifecycleLevel.START_SERVICE)
     public void startFramework() {
     }
 
     @LifecycleHandlerType(LifecycleHandlerType.LifecycleLevel.REGISTER_EVENTS)
     public void registerForExternalEvents() {
-        externalBus.register(killbillActivator);
     }
 
     @LifecycleHandlerType(LifecycleHandlerType.LifecycleLevel.UNREGISTER_EVENTS)
     public void unregisterForExternalEvents() {
-        externalBus.unregister(killbillActivator);
     }
 
     @LifecycleHandlerType(LifecycleLevel.STOP_SERVICE)
@@ -119,24 +127,37 @@ public class DefaultOSGIService implements OSGIService {
 
     private void installAndStartBundles(final Framework framework) throws BundleException {
 
-        final BundleContext context = framework.getBundleContext();
 
-        // Install the bundles
-        List<Bundle> installedBundles = new LinkedList<Bundle>();
-        for (String bundlePath : lookupInstalledBundles()) {
-            installedBundles.add(context.installBundle(bundlePath));
-        }
+        try {
+            final BundleContext context = framework.getBundleContext();
 
-        // Start all the bundles
-        for (Bundle bundle : installedBundles) {
-            bundle.start();
+            // Install all bundles and create service mapping
+            final List<Bundle> installedBundles = new LinkedList<Bundle>();
+            final List<PluginRubyConfig> pluginRubyConfigs = pluginFinder.getLatestRubyPlugins();
+            for (PluginRubyConfig cur : pluginRubyConfigs) {
+                final Bundle bundle = context.installBundle(osgiConfig.getJrubyBundlePath());
+                ((DefaultPluginConfigServiceApi) pluginConfigServiceApi).registerBundle(bundle.getBundleId(), cur);
+                installedBundles.add(bundle);
+            }
+
+            // Register all services -- Killbill Apis, PluginConfigServiceApi, ExternalBus
+            killbillActivator.registerServices();
+
+            // Start all the bundles
+            for (Bundle bundle : installedBundles) {
+                bundle.start();
+            }
+
+        } catch (PluginConfigException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
     }
 
+    /*
     private String[] lookupInstalledBundles() {
 
         final List<String> result = new LinkedList<String>();
-        final File bundleInstallationDir = new File(osgiConfig.getBundleInstallationDir());
+        final File bundleInstallationDir = new File(osgiConfig.getRootInstallationDir());
         for (File f : bundleInstallationDir.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(final File dir, final String name) {
@@ -147,14 +168,15 @@ public class DefaultOSGIService implements OSGIService {
         }
         return result.toArray(new String[result.size()]);
     }
+    */
 
 
     private Framework createAndInitFramework() throws BundleException {
 
         final Map<String, String> config = new HashMap<String, String>();
         config.put("org.osgi.framework.system.packages.extra", osgiConfig.getSystemBundleExportPackages());
-        config.put("felix.cache.rootdir", osgiConfig.getRootDir());
-        config.put("org.osgi.framework.storage", osgiConfig.getBundleCacheName());
+        config.put("felix.cache.rootdir", osgiConfig.getOSGIBundleRootDir());
+        config.put("org.osgi.framework.storage", osgiConfig.getOSGIBundleCacheName());
         return createAndInitFelixFrameworkWithSystemBundle(config);
     }
 
@@ -165,10 +187,7 @@ public class DefaultOSGIService implements OSGIService {
         final Map<Object, Object> felixConfig = new HashMap<Object, Object>();
         felixConfig.putAll(config);
 
-        // Create the system bundle activator that will register the required services for Killbill
-        this.killbillActivator = new KillbillActivator(accountUserApi, externalBus);
         felixConfig.put(FelixConstants.SYSTEMBUNDLE_ACTIVATORS_PROP, Collections.singletonList(killbillActivator));
-
         Framework felix = new Felix(felixConfig);
         felix.init();
         return felix;
@@ -176,7 +195,7 @@ public class DefaultOSGIService implements OSGIService {
 
 
     private void pruneOSGICache() {
-        final String path = osgiConfig.getRootDir() + "/" + osgiConfig.getBundleCacheName();
+        final String path = osgiConfig.getOSGIBundleRootDir() + "/" + osgiConfig.getOSGIBundleCacheName();
         deleteUnderDirectory(new File(path));
     }
 

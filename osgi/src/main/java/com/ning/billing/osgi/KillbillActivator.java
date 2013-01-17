@@ -16,6 +16,8 @@
 
 package com.ning.billing.osgi;
 
+import javax.inject.Inject;
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -25,29 +27,36 @@ import org.osgi.framework.ServiceRegistration;
 
 import com.ning.billing.account.api.AccountUserApi;
 import com.ning.billing.beatrix.bus.api.ExternalBus;
+import com.ning.billing.osgi.api.config.PluginConfigServiceApi;
 import com.ning.billing.payment.plugin.api.PaymentPluginApi;
 
 public class KillbillActivator implements BundleActivator {
 
     private final AccountUserApi accountUserApi;
-
     private final ExternalBus externalBus;
+    private final PluginConfigServiceApi configServiceApi;
 
     private volatile BundleContext context = null;
     private volatile ServiceRegistration accountApiRegistration = null;
     private volatile ServiceRegistration externalBusRegistration = null;
+    private volatile ServiceRegistration configServiceApiRegistration = null;
 
-    public KillbillActivator(final AccountUserApi accountUserApi, final ExternalBus externalBus) {
-
+    @Inject
+    public KillbillActivator(final AccountUserApi accountUserApi, final ExternalBus externalBus, final PluginConfigServiceApi configServiceApi) {
         this.accountUserApi = accountUserApi;
         this.externalBus = externalBus;
+        this.configServiceApi = configServiceApi;
     }
 
     @Override
     public void start(final BundleContext context) throws Exception {
         this.context = context;
+    }
+
+    public void registerServices() {
         this.accountApiRegistration = context.registerService(AccountUserApi.class.getName(), accountUserApi, null);
         this.externalBusRegistration = context.registerService(ExternalBus.class.getName(), externalBus, null);
+        this.configServiceApiRegistration = context.registerService(PluginConfigServiceApi.class.getName(), configServiceApi, null);
     }
 
     @Override
@@ -61,6 +70,12 @@ public class KillbillActivator implements BundleActivator {
             externalBusRegistration.unregister();
             externalBusRegistration = null;
         }
+
+        if (configServiceApiRegistration != null) {
+            configServiceApiRegistration.unregister();
+            configServiceApiRegistration = null;
+        }
+
         this.context = null;
     }
 

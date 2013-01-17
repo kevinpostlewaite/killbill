@@ -34,6 +34,8 @@ public class Activator implements BundleActivator {
     public void start(final BundleContext context) throws Exception {
         // TODO instantiate the plugin depending on the config
 
+        context.getBundle().getBundleId();
+
         // Validate and instantiate the plugin
         final Map<String, Object> killbillApis = retrieveKillbillApis(context);
         plugin.instantiatePlugin(killbillApis);

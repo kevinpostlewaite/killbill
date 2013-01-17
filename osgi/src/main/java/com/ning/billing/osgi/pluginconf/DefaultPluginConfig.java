@@ -56,10 +56,12 @@ public abstract class DefaultPluginConfig implements PluginConfig {
     }
 
     @Override
-    public abstract String getPluginLanguage();
+    public abstract PluginLanguage getPluginLanguage();
 
 
-    @Override
+    protected abstract void validate() throws PluginConfigException;
+
+        @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;

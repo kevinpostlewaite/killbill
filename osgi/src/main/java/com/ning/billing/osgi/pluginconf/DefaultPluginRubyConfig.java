@@ -23,8 +23,6 @@ import com.ning.billing.osgi.api.config.PluginRubyConfig;
 
 public class DefaultPluginRubyConfig extends DefaultPluginConfig implements PluginRubyConfig {
 
-    public static final String PLUGIN_LANGUGAGE = "ruby";
-
     private static final String INSTALLATION_GEM_NAME = "gems";
 
     private static final String PROP_RUBY_MAIN_CLASS_NAME = "mainClass";
@@ -39,7 +37,8 @@ public class DefaultPluginRubyConfig extends DefaultPluginConfig implements Plug
         validate();
     }
 
-    private void validate() throws PluginConfigException {
+    @Override
+    protected void validate() throws PluginConfigException {
         if (rubyMainClass == null) {
             throw new PluginConfigException("Missing property " + PROP_RUBY_MAIN_CLASS_NAME + " for plugin " + getPluginVersionnedName());
         }
@@ -59,7 +58,7 @@ public class DefaultPluginRubyConfig extends DefaultPluginConfig implements Plug
     }
 
     @Override
-    public String getPluginLanguage() {
-        return PLUGIN_LANGUGAGE;
+    public PluginLanguage getPluginLanguage() {
+        return PluginLanguage.RUBY;
     }
 }

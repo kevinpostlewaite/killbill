@@ -133,6 +133,9 @@ public class DefaultOSGIService implements OSGIService {
 
             // Install all bundles and create service mapping
             final List<Bundle> installedBundles = new LinkedList<Bundle>();
+
+            // STEPH look for java plugin as well
+
             final List<PluginRubyConfig> pluginRubyConfigs = pluginFinder.getLatestRubyPlugins();
             for (PluginRubyConfig cur : pluginRubyConfigs) {
                 final Bundle bundle = context.installBundle(osgiConfig.getJrubyBundlePath());
@@ -152,24 +155,6 @@ public class DefaultOSGIService implements OSGIService {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
     }
-
-    /*
-    private String[] lookupInstalledBundles() {
-
-        final List<String> result = new LinkedList<String>();
-        final File bundleInstallationDir = new File(osgiConfig.getRootInstallationDir());
-        for (File f : bundleInstallationDir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(final File dir, final String name) {
-                return name.endsWith(".jar");
-            }
-        })) {
-            result.add("file:" + f.getAbsolutePath());
-        }
-        return result.toArray(new String[result.size()]);
-    }
-    */
-
 
     private Framework createAndInitFramework() throws BundleException {
 

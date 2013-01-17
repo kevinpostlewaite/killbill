@@ -16,19 +16,45 @@
 
 package com.ning.billing.osgi.pluginconf;
 
+import java.io.File;
 import java.util.Properties;
 
-public class DefaultPluginJavaConfig extends DefaultPluginConfig {
+import com.ning.billing.osgi.api.config.PluginJavaConfig;
 
+public class DefaultPluginJavaConfig extends DefaultPluginConfig implements PluginJavaConfig {
 
-    public static final String PLUGIN_LANGUGAGE = "java";
+    private final String bundleJarPath;
 
-    public DefaultPluginJavaConfig(final String pluginName, final String version, final Properties props) {
+    public DefaultPluginJavaConfig(final String pluginName, final String version, final File pluginVersionRoot, final Properties props) throws PluginConfigException {
         super(pluginName, version, props);
+        this.bundleJarPath = extractJarPath(pluginVersionRoot);
+        validate();
+    }
+
+
+    private String extractJarPath(final File pluginVersionRoot) {
+        for (File f : pluginVersionRoot.listFiles()) {
+            if (f.isFile() && f.getName().endsWith(".jar")) {
+                return f.getAbsolutePath();
+            }
+        }
+        return null;
     }
 
     @Override
-    public String getPluginLanguage() {
-        return PLUGIN_LANGUGAGE;
+    public String getBundleJarPath() {
+        return bundleJarPath;
+    }
+
+    @Override
+    public PluginLanguage getPluginLanguage() {
+        return PluginLanguage.JAVA;
+    }
+
+    @Override
+    protected void validate() throws PluginConfigException {
+        if (bundleJarPath == null) {
+            throw new PluginConfigException("Invalid plugin " + getPluginVersionnedName() + ": cannot find jar file");
+        }
     }
 }

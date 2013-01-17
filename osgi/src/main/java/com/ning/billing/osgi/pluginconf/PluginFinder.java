@@ -30,79 +30,87 @@ import java.util.Properties;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ning.billing.osgi.api.config.PluginConfig;
+import com.ning.billing.osgi.api.config.PluginConfig.PluginLanguage;
+import com.ning.billing.osgi.api.config.PluginJavaConfig;
 import com.ning.billing.osgi.api.config.PluginRubyConfig;
 import com.ning.billing.util.config.OSGIConfig;
 
 public class PluginFinder {
 
-
     private final static String INSTALATION_PROPERTIES = "killbill.properties";
 
-    private final OSGIConfig osgiConfig;
+    private final Logger logger = LoggerFactory.getLogger(PluginFinder.class);
 
-    private final Map<String, List<DefaultPluginRubyConfig>> rubyPlugins;
+    private final OSGIConfig osgiConfig;
+    private final Map<String, List<? extends PluginConfig>> allPlugins;
 
     @Inject
     public PluginFinder(final OSGIConfig osgiConfig) {
         this.osgiConfig = osgiConfig;
-        this.rubyPlugins = new HashMap<String, List<DefaultPluginRubyConfig>>();
+        this.allPlugins = new HashMap<String, List<? extends PluginConfig>>();
+    }
+
+    public List<PluginJavaConfig> getLatestJavaPlugins() throws PluginConfigException {
+        return getLatestPluginForLanguage(PluginLanguage.JAVA);
     }
 
     public List<PluginRubyConfig> getLatestRubyPlugins() throws PluginConfigException {
+        return getLatestPluginForLanguage(PluginLanguage.RUBY);
+    }
 
-        loadRubyPluginsIfRequired();
+    public <T extends PluginConfig> List<T> getVersionsForPlugin(final String lookupName) throws PluginConfigException {
 
-        final List<PluginRubyConfig> result = new LinkedList<PluginRubyConfig>();
-        for (final String pluginName : rubyPlugins.keySet()) {
-            result.add(rubyPlugins.get(pluginName).get(0));
+        loadPluginsIfRequired();
+
+        final List<T> result = new LinkedList<T>();
+        for (final String pluginName : allPlugins.keySet()) {
+            if (pluginName.equals(lookupName)) {
+                for (PluginConfig cur : allPlugins.get(pluginName)) {
+                    result.add((T) cur);
+                }
+            }
         }
         return result;
     }
 
-    private void loadRubyPluginsIfRequired() throws PluginConfigException {
+    private <T extends PluginConfig> List<T> getLatestPluginForLanguage(final PluginLanguage pluginLanguage) throws PluginConfigException {
 
-        synchronized (rubyPlugins) {
+        loadPluginsIfRequired();
 
-            if (rubyPlugins.size() > 0) {
+        final List<T> result = new LinkedList<T>();
+        for (final String pluginName : allPlugins.keySet()) {
+            final T plugin = (T) allPlugins.get(pluginName).get(0);
+            if (pluginLanguage != plugin.getPluginLanguage()) {
+                continue;
+            }
+            result.add(plugin);
+        }
+        return result;
+
+    }
+
+    private void loadPluginsIfRequired() throws PluginConfigException {
+
+        synchronized (allPlugins) {
+
+            if (allPlugins.size() > 0) {
                 return;
             }
 
-            final String rootDirPath = osgiConfig.getRootInstallationDir() + "/" + DefaultPluginRubyConfig.PLUGIN_LANGUGAGE;
-            final File rootDir = new File(rootDirPath);
-            if (rootDir == null || !rootDir.exists() || !rootDir.isDirectory()) {
-                throw new PluginConfigException("Configuration root dir " + rootDirPath + " is not a valid directory");
-            }
-            for (final File curPlugin : rootDir.listFiles()) {
-                // Skip any non directory entry
-                if (!curPlugin.isDirectory()) {
-                    continue;
-                }
-                final String pluginName = curPlugin.getName();
-
-                for (final File curVersion : curPlugin.listFiles()) {
-                    // Skip any non directory entry
-                    if (!curVersion.isDirectory()) {
-                        continue;
-                    }
-                    final String version = curVersion.getName();
-
-                    final DefaultPluginRubyConfig plugin = extractPluginRubyConfig(pluginName, version, curVersion);
-                    List<DefaultPluginRubyConfig> curPluginVersionlist = rubyPlugins.get(plugin.getPluginName());
-                    if (curPluginVersionlist == null) {
-                        curPluginVersionlist = new LinkedList<DefaultPluginRubyConfig>();
-                        rubyPlugins.put(plugin.getPluginName(), curPluginVersionlist);
-                    }
-                    curPluginVersionlist.add(plugin);
-                }
-            }
+            loadPluginsForLanguage(PluginLanguage.RUBY);
+            loadPluginsForLanguage(PluginLanguage.JAVA);
 
             // Order for each plugin by versions starting from highest version
-            for (final String pluginName : rubyPlugins.keySet()) {
-                final List<DefaultPluginRubyConfig> value = rubyPlugins.get(pluginName);
-                Collections.sort(value, new Comparator<DefaultPluginRubyConfig>() {
+            for (final String pluginName : allPlugins.keySet()) {
+                final List<? extends PluginConfig> value = allPlugins.get(pluginName);
+                Collections.sort(value, new Comparator<PluginConfig>() {
                     @Override
-                    public int compare(final DefaultPluginRubyConfig o1, final DefaultPluginRubyConfig o2) {
-                        return o1.getVersion().compareTo(o2.getVersion());
+                    public int compare(final PluginConfig o1, final PluginConfig o2) {
+                        return -(o1.getVersion().compareTo(o2.getVersion()));
                     }
                 });
             }
@@ -110,8 +118,45 @@ public class PluginFinder {
     }
 
 
-    private DefaultPluginRubyConfig extractPluginRubyConfig(final String pluginName, final String pluginVersion, final File pluginVersionDir) throws PluginConfigException {
+    private <T extends PluginConfig> void loadPluginsForLanguage(final PluginLanguage pluginLanguage) throws PluginConfigException {
 
+        final String rootDirPath = osgiConfig.getRootInstallationDir() + "/" + pluginLanguage.toString().toLowerCase();
+        final File rootDir = new File(rootDirPath);
+        if (rootDir == null || !rootDir.exists() || !rootDir.isDirectory()) {
+            throw new PluginConfigException("Configuration root dir " + rootDirPath + " is not a valid directory");
+        }
+        for (final File curPlugin : rootDir.listFiles()) {
+            // Skip any non directory entry
+            if (!curPlugin.isDirectory()) {
+                logger.warn("Skipping entry {} in directory {}", curPlugin.getName(), rootDir.getAbsolutePath());
+                continue;
+            }
+            final String pluginName = curPlugin.getName();
+
+            for (final File curVersion : curPlugin.listFiles()) {
+                // Skip any non directory entry
+                if (!curVersion.isDirectory()) {
+                    logger.warn("Skipping entry {} in directory {}", curPlugin.getName(), rootDir.getAbsolutePath());
+                    continue;
+                }
+                final String version = curVersion.getName();
+
+                final T plugin = extractPluginConfig(pluginLanguage, pluginName, version, curVersion);
+                List<T> curPluginVersionlist = (List<T>) allPlugins.get(plugin.getPluginName());
+                if (curPluginVersionlist == null) {
+                    curPluginVersionlist = new LinkedList<T>();
+                    allPlugins.put(plugin.getPluginName(), curPluginVersionlist);
+                }
+                curPluginVersionlist.add(plugin);
+                logger.info("Adding plugin {} ", plugin.getPluginVersionnedName());
+            }
+        }
+    }
+
+
+    private <T extends PluginConfig> T extractPluginConfig(final PluginLanguage pluginLanguage, final String pluginName, final String pluginVersion, final File pluginVersionDir) throws PluginConfigException {
+
+        T result = null;
         Properties props = null;
         try {
             for (final File cur : pluginVersionDir.listFiles()) {
@@ -119,23 +164,30 @@ public class PluginFinder {
                 if (cur.isFile() && cur.getName().equals(INSTALATION_PROPERTIES)) {
                     props = readPluginConfigurationFile(cur);
                 }
-
                 if (props != null) {
                     break;
                 }
             }
 
-            if (props == null) {
+            if (pluginLanguage == PluginLanguage.RUBY && props == null) {
                 throw new PluginConfigException("Invalid plugin configuration file for " + pluginName + "-" + pluginVersion);
             }
 
         } catch (IOException e) {
             throw new PluginConfigException("Failed to read property file for " + pluginName + "-" + pluginVersion, e);
         }
-
-        return new DefaultPluginRubyConfig(pluginName, pluginVersion, pluginVersionDir, props);
+        switch (pluginLanguage) {
+            case RUBY:
+                result = (T) new DefaultPluginRubyConfig(pluginName, pluginVersion, pluginVersionDir, props);
+                break;
+            case JAVA:
+                result = (T) new DefaultPluginJavaConfig(pluginName, pluginVersion, pluginVersionDir, (props == null) ? new Properties() : props);
+                break;
+            default:
+                throw new RuntimeException("Unknown plugin language " + pluginLanguage);
+        }
+        return result;
     }
-
 
     private Properties readPluginConfigurationFile(final File config) throws IOException {
 
@@ -151,5 +203,4 @@ public class PluginFinder {
         br.close();
         return props;
     }
-
 }

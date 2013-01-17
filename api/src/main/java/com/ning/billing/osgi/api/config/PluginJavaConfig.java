@@ -16,25 +16,7 @@
 
 package com.ning.billing.osgi.api.config;
 
-public interface PluginConfig {
+public interface PluginJavaConfig extends PluginConfig {
 
-    public enum PluginType {
-        PAYMENT,
-        NOTIFICATION
-    }
-
-    public enum PluginLanguage {
-        JAVA,
-        RUBY
-    }
-
-    public String getPluginName();
-
-    public PluginType getPluginType();
-
-    public String getVersion();
-
-    public String getPluginVersionnedName();
-
-    public PluginLanguage getPluginLanguage();
+    public String getBundleJarPath();
 }

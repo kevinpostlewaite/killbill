@@ -17,11 +17,15 @@
 package com.ning.billing.osgi.jruby;
 
 import java.math.BigDecimal;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.UUID;
 
 import org.jruby.Ruby;
 import org.jruby.javasupport.JavaEmbedUtils;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 
 import com.ning.billing.account.api.Account;
 import com.ning.billing.payment.api.PaymentMethodPlugin;
@@ -33,8 +37,26 @@ import com.ning.billing.util.callcontext.TenantContext;
 
 public class JRubyPaymentPlugin extends JRubyPlugin implements PaymentPluginApi {
 
+    private volatile ServiceRegistration paymentInfoPluginRegistration;
+
     public JRubyPaymentPlugin(final String pluginMainClass, final String pluginLibdir) {
         super(pluginMainClass, pluginLibdir);
+    }
+
+    @Override
+    public void startPlugin(final BundleContext context) {
+        super.startPlugin(context);
+
+        final Dictionary<String, Object> props = new Hashtable<String, Object>();
+        props.put("name", pluginMainClass);
+        paymentInfoPluginRegistration = context.registerService(PaymentPluginApi.class.getName(), this, props);
+    }
+
+    @Override
+    public void stopPlugin(final BundleContext context) {
+        paymentInfoPluginRegistration.unregister();
+
+        super.stopPlugin(context);
     }
 
     @Override

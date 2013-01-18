@@ -21,11 +21,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jruby.embed.ScriptingContainer;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.osgi.service.log.LogService;
 
 import com.ning.billing.account.api.AccountUserApi;
 import com.ning.billing.analytics.api.sanity.AnalyticsSanityApi;
@@ -39,6 +39,9 @@ import com.ning.billing.invoice.api.InvoiceMigrationApi;
 import com.ning.billing.invoice.api.InvoicePaymentApi;
 import com.ning.billing.invoice.api.InvoiceUserApi;
 import com.ning.billing.meter.api.MeterUserApi;
+import com.ning.billing.osgi.api.config.PluginConfig.PluginType;
+import com.ning.billing.osgi.api.config.PluginConfigServiceApi;
+import com.ning.billing.osgi.api.config.PluginRubyConfig;
 import com.ning.billing.overdue.OverdueUserApi;
 import com.ning.billing.payment.api.PaymentApi;
 import com.ning.billing.tenant.api.TenantUserApi;
@@ -50,31 +53,65 @@ import com.ning.billing.util.api.TagUserApi;
 
 public class Activator implements BundleActivator {
 
-    private static final Logger log = LoggerFactory.getLogger(Activator.class);
+    private final List<ServiceReference> serviceReferences = new ArrayList<ServiceReference>();
 
-    private final List<ServiceReference<?>> apiReferences = new ArrayList<ServiceReference<?>>();
-
-    private String pluginMainClass = null;
+    private LogService logger = null;
     private JRubyPlugin plugin = null;
 
     public void start(final BundleContext context) throws Exception {
-        // TODO instantiate the plugin depending on the config
+        logger = retrieveApi(context, LogService.class);
+        log(LogService.LOG_INFO, "JRuby bundle activated");
 
-        context.getBundle().getBundleId();
+        final ScriptingContainer scriptingContainer = setupScriptingContainer();
+        scriptingContainer.runScriptlet("puts 'it works'");
+
+        // Retrieve the plugin config
+        final PluginRubyConfig rubyConfig = retrievePluginRubyConfig(context);
+        if (PluginType.NOTIFICATION.equals(rubyConfig.getPluginType())) {
+            plugin = new JRubyNotificationPlugin(rubyConfig, logger);
+        } else if (PluginType.PAYMENT.equals(rubyConfig.getPluginType())) {
+            plugin = new JRubyPaymentPlugin(rubyConfig, logger);
+        }
 
         // Validate and instantiate the plugin
         final Map<String, Object> killbillApis = retrieveKillbillApis(context);
         plugin.instantiatePlugin(killbillApis);
 
-        log.info("Starting JRuby plugin {}", pluginMainClass);
+        log(LogService.LOG_INFO, "Starting JRuby plugin " + plugin.getPluginMainClass());
         plugin.startPlugin(context);
     }
 
+    private PluginRubyConfig retrievePluginRubyConfig(final BundleContext context) {
+        final ServiceReference pluginConfigServiceApiServiceReference = context.getServiceReference(PluginConfigServiceApi.class.getName());
+        final PluginConfigServiceApi pluginConfigServiceApi = (PluginConfigServiceApi) context.getService(pluginConfigServiceApiServiceReference);
+        return pluginConfigServiceApi.getPluginRubyConfig(context.getBundle().getBundleId());
+    }
+
+    // JRuby/Felix specifics, it works out of the box on Equinox.
+    // Other OSGI frameworks are untested.
+    private ScriptingContainer setupScriptingContainer() {
+        // Tell JRuby to use the correct class loader
+        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+
+        final ScriptingContainer scriptingContainer = new ScriptingContainer();
+
+        final ArrayList<String> loadPaths = new ArrayList<String>();
+        // TODO Needed? For Equinox maybe
+        loadPaths.add("classpath:/");
+        // Needed for Felix, not for Equinox
+        // TODO Be smarter
+        loadPaths.add("bundle://1.0:1");
+        // Set the load paths instead of adding, to avoid looking at the filesystem
+        scriptingContainer.setLoadPaths(loadPaths);
+
+        return scriptingContainer;
+    }
+
     public void stop(final BundleContext context) throws Exception {
-        log.info("Stopping JRuby plugin {}", pluginMainClass);
+        log(LogService.LOG_INFO, "Stopping JRuby plugin " + plugin.getPluginMainClass());
         plugin.stopPlugin(context);
 
-        for (final ServiceReference<?> apiReference : apiReferences) {
+        for (final ServiceReference apiReference : serviceReferences) {
             context.ungetService(apiReference);
         }
     }
@@ -83,40 +120,53 @@ public class Activator implements BundleActivator {
         final Map<String, Object> killbillUserApis = new HashMap<String, Object>();
 
         // See killbill/plugin.rb for the naming convention magic
-        killbillUserApis.put("account_user_api", retrieveApi(context, AccountUserApi.class.getName()));
-        killbillUserApis.put("analytics_sanity_api", retrieveApi(context, AnalyticsSanityApi.class.getName()));
-        killbillUserApis.put("analytics_user_api", retrieveApi(context, AnalyticsUserApi.class.getName()));
-        killbillUserApis.put("catalog_user_api", retrieveApi(context, CatalogUserApi.class.getName()));
-        killbillUserApis.put("entitlement_migration_api", retrieveApi(context, EntitlementMigrationApi.class.getName()));
-        killbillUserApis.put("entitlement_timeline_api", retrieveApi(context, EntitlementTimelineApi.class.getName()));
-        killbillUserApis.put("entitlement_transfer_api", retrieveApi(context, EntitlementTransferApi.class.getName()));
-        killbillUserApis.put("entitlement_user_api", retrieveApi(context, EntitlementUserApi.class.getName()));
-        killbillUserApis.put("invoice_migration_api", retrieveApi(context, InvoiceMigrationApi.class.getName()));
-        killbillUserApis.put("invoice_payment_api", retrieveApi(context, InvoicePaymentApi.class.getName()));
-        killbillUserApis.put("invoice_user_api", retrieveApi(context, InvoiceUserApi.class.getName()));
-        killbillUserApis.put("meter_user_api", retrieveApi(context, MeterUserApi.class.getName()));
-        killbillUserApis.put("overdue_user_api", retrieveApi(context, OverdueUserApi.class.getName()));
-        killbillUserApis.put("payment_api", retrieveApi(context, PaymentApi.class.getName()));
-        killbillUserApis.put("tenant_user_api", retrieveApi(context, TenantUserApi.class.getName()));
-        killbillUserApis.put("usage_user_api", retrieveApi(context, UsageUserApi.class.getName()));
-        killbillUserApis.put("audit_user_api", retrieveApi(context, AuditUserApi.class.getName()));
-        killbillUserApis.put("custom_field_user_api", retrieveApi(context, CustomFieldUserApi.class.getName()));
-        killbillUserApis.put("export_user_api", retrieveApi(context, ExportUserApi.class.getName()));
-        killbillUserApis.put("tag_user_api", retrieveApi(context, TagUserApi.class.getName()));
+        killbillUserApis.put("account_user_api", retrieveApi(context, AccountUserApi.class));
+        killbillUserApis.put("analytics_sanity_api", retrieveApi(context, AnalyticsSanityApi.class));
+        killbillUserApis.put("analytics_user_api", retrieveApi(context, AnalyticsUserApi.class));
+        killbillUserApis.put("catalog_user_api", retrieveApi(context, CatalogUserApi.class));
+        killbillUserApis.put("entitlement_migration_api", retrieveApi(context, EntitlementMigrationApi.class));
+        killbillUserApis.put("entitlement_timeline_api", retrieveApi(context, EntitlementTimelineApi.class));
+        killbillUserApis.put("entitlement_transfer_api", retrieveApi(context, EntitlementTransferApi.class));
+        killbillUserApis.put("entitlement_user_api", retrieveApi(context, EntitlementUserApi.class));
+        killbillUserApis.put("invoice_migration_api", retrieveApi(context, InvoiceMigrationApi.class));
+        killbillUserApis.put("invoice_payment_api", retrieveApi(context, InvoicePaymentApi.class));
+        killbillUserApis.put("invoice_user_api", retrieveApi(context, InvoiceUserApi.class));
+        killbillUserApis.put("meter_user_api", retrieveApi(context, MeterUserApi.class));
+        killbillUserApis.put("overdue_user_api", retrieveApi(context, OverdueUserApi.class));
+        killbillUserApis.put("payment_api", retrieveApi(context, PaymentApi.class));
+        killbillUserApis.put("tenant_user_api", retrieveApi(context, TenantUserApi.class));
+        killbillUserApis.put("usage_user_api", retrieveApi(context, UsageUserApi.class));
+        killbillUserApis.put("audit_user_api", retrieveApi(context, AuditUserApi.class));
+        killbillUserApis.put("custom_field_user_api", retrieveApi(context, CustomFieldUserApi.class));
+        killbillUserApis.put("export_user_api", retrieveApi(context, ExportUserApi.class));
+        killbillUserApis.put("tag_user_api", retrieveApi(context, TagUserApi.class));
 
         return killbillUserApis;
     }
 
-    private <T> T retrieveApi(final BundleContext context, final String apiClazzName) {
-        final ServiceReference apiReference = context.getServiceReference(apiClazzName);
+    /**
+     * Retrieve a service class (e.g. Killbill API)
+     *
+     * @param context OSGI Bundle context
+     * @param clazz   service class to retrieve
+     * @param <T>     class type to retrieve
+     * @return instance of the service class
+     */
+    private <T> T retrieveApi(final BundleContext context, final Class<T> clazz) {
+        final ServiceReference apiReference = context.getServiceReference(clazz.getName());
         if (apiReference != null) {
             // Keep references to stop the bundle properly
-            apiReferences.add(apiReference);
+            serviceReferences.add(apiReference);
 
-            //noinspection unchecked
             return (T) context.getService(apiReference);
         } else {
             return null;
+        }
+    }
+
+    private void log(final int level, final String message) {
+        if (logger != null) {
+            logger.log(level, message);
         }
     }
 }

@@ -38,8 +38,9 @@ public interface OSGIConfig extends KillbillConfig {
     @Default("com.ning.billing.account.api,com.ning.billing.beatrix.bus.api,com.ning.billing.payment.plugin.api,com.ning.billing.osgi.api.config,com.ning.billing.util.callcontext,com.google.common.eventbus")
     public String getSystemBundleExportPackages();
 
+    // TODO FIXME OSGI
     @Config("killbill.osgi.jruby.bundle.path")
-    @Default("/var/tmp/killbill-osgi-jruby-bundle-0.1.51-SNAPSHOT-jar-with-dependencies.jar")
+    @Default("file:/var/tmp/killbill-osgi-jruby-bundle-0.1.51-SNAPSHOT-jar-with-dependencies.jar")
     public String getJrubyBundlePath();
 
 }

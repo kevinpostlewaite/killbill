@@ -20,15 +20,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ning.billing.osgi.api.config.PluginConfigServiceApi;
+import com.ning.billing.osgi.api.config.PluginJavaConfig;
 import com.ning.billing.osgi.api.config.PluginRubyConfig;
 
 public class DefaultPluginConfigServiceApi implements PluginConfigServiceApi {
 
+    private final Map<Long, PluginJavaConfig> javaConfigMappings = new HashMap<Long, PluginJavaConfig>();
+    private final Map<Long, PluginRubyConfig> rubyConfigMappings = new HashMap<Long, PluginRubyConfig>();
 
-    private final Map<Long, PluginRubyConfig> rubyConfigMappings;
-
-    public DefaultPluginConfigServiceApi() {
-        rubyConfigMappings = new HashMap<Long, PluginRubyConfig>();
+    @Override
+    public PluginJavaConfig getPluginJavaConfig(final long bundleId) {
+        synchronized (javaConfigMappings) {
+            return javaConfigMappings.get(bundleId);
+        }
     }
 
     @Override
@@ -38,7 +42,13 @@ public class DefaultPluginConfigServiceApi implements PluginConfigServiceApi {
         }
     }
 
-    public void registerBundle(Long bundleId, final PluginRubyConfig rubyConfig) {
+    public void registerBundle(final Long bundleId, final PluginJavaConfig javaConfig) {
+        synchronized (javaConfigMappings) {
+            javaConfigMappings.put(bundleId, javaConfig);
+        }
+    }
+
+    public void registerBundle(final Long bundleId, final PluginRubyConfig rubyConfig) {
         synchronized (rubyConfigMappings) {
             rubyConfigMappings.put(bundleId, rubyConfig);
         }

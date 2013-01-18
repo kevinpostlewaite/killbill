@@ -20,11 +20,11 @@ import java.io.IOException;
 
 public class PluginConfigException extends Exception {
 
-    public PluginConfigException(String msg) {
+    public PluginConfigException(final String msg) {
         super(msg);
     }
 
-    public PluginConfigException(String msg, IOException ioe) {
+    public PluginConfigException(final String msg, final IOException ioe) {
         super(msg, ioe);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 Ning, Inc.
+ * Copyright 2010-2013 Ning, Inc.
  *
  * Ning licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -14,19 +14,15 @@
  * under the License.
  */
 
-package com.ning.billing.catalog.api;
+package com.ning.billing.beatrix.integration.osgi;
 
-import com.ning.billing.util.callcontext.TenantContext;
+import com.ning.billing.beatrix.integration.TestIntegrationBase;
+import com.ning.billing.util.config.OSGIConfig;
 
-/**
- * The interface {@code CatalogUserApi} to retrieve catalog information
- */
-public interface CatalogUserApi {
+import com.google.inject.Inject;
 
-    /**
-     * @param catalogName the name of the catalog
-     * @param context     the user context that specifies the enant information
-     * @return the {@code Catalog}
-     */
-    Catalog getCatalog(String catalogName, TenantContext context);
+public class TestOSGIBase extends TestIntegrationBase {
+
+    @Inject
+    protected OSGIConfig config;
 }

@@ -22,12 +22,16 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 import org.jruby.Ruby;
 import org.jruby.javasupport.JavaEmbedUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.log.LogService;
 
 import com.ning.billing.account.api.Account;
+import com.ning.billing.osgi.api.config.PluginRubyConfig;
 import com.ning.billing.payment.api.PaymentMethodPlugin;
 import com.ning.billing.payment.plugin.api.PaymentInfoPlugin;
 import com.ning.billing.payment.plugin.api.PaymentPluginApi;
@@ -39,8 +43,8 @@ public class JRubyPaymentPlugin extends JRubyPlugin implements PaymentPluginApi 
 
     private volatile ServiceRegistration paymentInfoPluginRegistration;
 
-    public JRubyPaymentPlugin(final String pluginMainClass, final String pluginLibdir) {
-        super(pluginMainClass, pluginLibdir);
+    public JRubyPaymentPlugin(final PluginRubyConfig config, @Nullable final LogService logger) {
+        super(config, logger);
     }
 
     @Override

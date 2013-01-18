@@ -18,5 +18,7 @@ package com.ning.billing.osgi.api.config;
 
 public interface PluginConfigServiceApi {
 
+    public PluginJavaConfig getPluginJavaConfig(long bundleId);
+
     public PluginRubyConfig getPluginRubyConfig(long bundleId);
 }

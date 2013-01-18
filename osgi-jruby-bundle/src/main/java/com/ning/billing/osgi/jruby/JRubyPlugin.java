@@ -19,11 +19,16 @@ package com.ning.billing.osgi.jruby;
 import java.util.Arrays;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.jruby.Ruby;
 import org.jruby.RubyObject;
 import org.jruby.embed.EvalFailedException;
 import org.jruby.embed.ScriptingContainer;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.log.LogService;
+
+import com.ning.billing.osgi.api.config.PluginRubyConfig;
 
 // Bridge between the OSGI bundle and the ruby plugin
 public abstract class JRubyPlugin {
@@ -37,19 +42,31 @@ public abstract class JRubyPlugin {
     private static final String JAVA_APIS = "java_apis";
     private static final String ACTIVE = "@active";
 
+    protected final LogService logger;
     protected final String pluginMainClass;
     protected final ScriptingContainer container;
+    protected final String pluginLibdir;
 
     protected RubyObject pluginInstance;
 
-    public JRubyPlugin(final String pluginMainClass, final String pluginLibdir) {
-        this.pluginMainClass = pluginMainClass;
+    public JRubyPlugin(final PluginRubyConfig config, @Nullable final LogService logger) {
+        this.logger = logger;
+        this.pluginMainClass = config.getRubyMainClass();
         this.container = new ScriptingContainer();
+        this.pluginLibdir = config.getRubyLoadDir();
 
         // Path to the gem
         if (pluginLibdir != null) {
             container.setLoadPaths(Arrays.asList(pluginLibdir));
         }
+    }
+
+    public String getPluginMainClass() {
+        return pluginMainClass;
+    }
+
+    public String getPluginLibdir() {
+        return pluginLibdir;
     }
 
     public void instantiatePlugin(final Map<String, Object> killbillApis) {
@@ -114,7 +131,9 @@ public abstract class JRubyPlugin {
     }
 
     protected String checkInstanceOfPlugin(final String baseClass) {
-        return "require 'killbill'\n" +
+        return "ENV[\"GEM_HOME\"] = \"file:" + pluginLibdir + "\"\n" +
+               "ENV[\"GEM_PATH\"] = ENV[\"GEM_HOME\"]\n" +
+               "gem 'killbill'\n" +
                "raise ArgumentError.new('Invalid plugin: " + pluginMainClass + ", is not a " + baseClass + "') unless " + pluginMainClass + " <= " + baseClass;
     }
 

@@ -41,7 +41,7 @@ import com.ning.billing.util.config.OSGIConfig;
 
 public class PluginFinder {
 
-    private final static String INSTALATION_PROPERTIES = "killbill.properties";
+    private static final String INSTALATION_PROPERTIES = "killbill.properties";
 
     private final Logger logger = LoggerFactory.getLogger(PluginFinder.class);
 
@@ -63,13 +63,12 @@ public class PluginFinder {
     }
 
     public <T extends PluginConfig> List<T> getVersionsForPlugin(final String lookupName) throws PluginConfigException {
-
         loadPluginsIfRequired();
 
         final List<T> result = new LinkedList<T>();
         for (final String pluginName : allPlugins.keySet()) {
             if (pluginName.equals(lookupName)) {
-                for (PluginConfig cur : allPlugins.get(pluginName)) {
+                for (final PluginConfig cur : allPlugins.get(pluginName)) {
                     result.add((T) cur);
                 }
             }
@@ -78,7 +77,6 @@ public class PluginFinder {
     }
 
     private <T extends PluginConfig> List<T> getLatestPluginForLanguage(final PluginLanguage pluginLanguage) throws PluginConfigException {
-
         loadPluginsIfRequired();
 
         final List<T> result = new LinkedList<T>();
@@ -89,12 +87,11 @@ public class PluginFinder {
             }
             result.add(plugin);
         }
-        return result;
 
+        return result;
     }
 
     private void loadPluginsIfRequired() throws PluginConfigException {
-
         synchronized (allPlugins) {
 
             if (allPlugins.size() > 0) {
@@ -117,15 +114,19 @@ public class PluginFinder {
         }
     }
 
-
     private <T extends PluginConfig> void loadPluginsForLanguage(final PluginLanguage pluginLanguage) throws PluginConfigException {
-
         final String rootDirPath = osgiConfig.getRootInstallationDir() + "/" + pluginLanguage.toString().toLowerCase();
         final File rootDir = new File(rootDirPath);
-        if (rootDir == null || !rootDir.exists() || !rootDir.isDirectory()) {
-            throw new PluginConfigException("Configuration root dir " + rootDirPath + " is not a valid directory");
+        if (!rootDir.exists() || !rootDir.isDirectory()) {
+            logger.warn("Configuration root dir {} is not a valid directory", rootDirPath);
+            return;
         }
-        for (final File curPlugin : rootDir.listFiles()) {
+
+        final File[] files = rootDir.listFiles();
+        if (files == null) {
+            return;
+        }
+        for (final File curPlugin : files) {
             // Skip any non directory entry
             if (!curPlugin.isDirectory()) {
                 logger.warn("Skipping entry {} in directory {}", curPlugin.getName(), rootDir.getAbsolutePath());
@@ -133,7 +134,11 @@ public class PluginFinder {
             }
             final String pluginName = curPlugin.getName();
 
-            for (final File curVersion : curPlugin.listFiles()) {
+            final File[] filesInDir = curPlugin.listFiles();
+            if (filesInDir == null) {
+                continue;
+            }
+            for (final File curVersion : filesInDir) {
                 // Skip any non directory entry
                 if (!curVersion.isDirectory()) {
                     logger.warn("Skipping entry {} in directory {}", curPlugin.getName(), rootDir.getAbsolutePath());
@@ -153,13 +158,16 @@ public class PluginFinder {
         }
     }
 
-
     private <T extends PluginConfig> T extractPluginConfig(final PluginLanguage pluginLanguage, final String pluginName, final String pluginVersion, final File pluginVersionDir) throws PluginConfigException {
-
-        T result = null;
+        T result;
         Properties props = null;
         try {
-            for (final File cur : pluginVersionDir.listFiles()) {
+            final File[] files = pluginVersionDir.listFiles();
+            if (files == null) {
+                throw new PluginConfigException("Unable to list files in " + pluginVersionDir.getAbsolutePath());
+            }
+
+            for (final File cur : files) {
 
                 if (cur.isFile() && cur.getName().equals(INSTALATION_PROPERTIES)) {
                     props = readPluginConfigurationFile(cur);
@@ -190,7 +198,6 @@ public class PluginFinder {
     }
 
     private Properties readPluginConfigurationFile(final File config) throws IOException {
-
         final Properties props = new Properties();
         final BufferedReader br = new BufferedReader(new FileReader(config));
         String line;

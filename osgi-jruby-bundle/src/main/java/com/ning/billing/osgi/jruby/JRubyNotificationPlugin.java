@@ -16,35 +16,37 @@
 
 package com.ning.billing.osgi.jruby;
 
+import javax.annotation.Nullable;
+
 import org.jruby.javasupport.JavaEmbedUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.osgi.service.log.LogService;
 
 import com.ning.billing.beatrix.bus.api.ExtBusEvent;
 import com.ning.billing.beatrix.bus.api.ExternalBus;
+import com.ning.billing.osgi.api.config.PluginRubyConfig;
 
 import com.google.common.eventbus.Subscribe;
 
 public class JRubyNotificationPlugin extends JRubyPlugin {
 
-    private final Logger logger = LoggerFactory.getLogger(JRubyNotificationPlugin.class);
-
-    public JRubyNotificationPlugin(final String pluginMainClass, final String pluginLibdir) {
-        super(pluginMainClass, pluginLibdir);
+    public JRubyNotificationPlugin(final PluginRubyConfig config, @Nullable final LogService logger) {
+        super(config, logger);
     }
 
     @Override
     public void startPlugin(final BundleContext context) {
         super.startPlugin(context);
 
-        final ServiceReference<ExternalBus> externalBusReference = (ServiceReference) context.getServiceReference(ExternalBus.class.getName());
+        final ServiceReference externalBusReference = context.getServiceReference(ExternalBus.class.getName());
         try {
-            final ExternalBus externalBus = context.getService(externalBusReference);
+            final ExternalBus externalBus = (ExternalBus) context.getService(externalBusReference);
             externalBus.register(this);
         } catch (Exception e) {
-            logger.warn("Error registering notification plugin service", e);
+            if (logger != null) {
+                logger.log(LogService.LOG_WARNING, "Error registering notification plugin service", e);
+            }
         } finally {
             if (externalBusReference != null) {
                 context.ungetService(externalBusReference);

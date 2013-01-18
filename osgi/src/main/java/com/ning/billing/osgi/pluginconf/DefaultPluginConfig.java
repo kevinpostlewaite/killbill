@@ -22,7 +22,7 @@ import com.ning.billing.osgi.api.config.PluginConfig;
 
 public abstract class DefaultPluginConfig implements PluginConfig {
 
-    private final static String PROP_PLUGIN_TYPE_NAME = "pluginType";
+    private static final String PROP_PLUGIN_TYPE_NAME = "pluginType";
 
     private final String pluginName;
     private final PluginType pluginType;
@@ -31,9 +31,8 @@ public abstract class DefaultPluginConfig implements PluginConfig {
     public DefaultPluginConfig(final String pluginName, final String version, final Properties props) {
         this.pluginName = pluginName;
         this.version = version;
-        this.pluginType = PluginType.valueOf((String) props.get(PROP_PLUGIN_TYPE_NAME));
+        this.pluginType = PluginType.valueOf(props.getProperty(PROP_PLUGIN_TYPE_NAME, PluginType.__UNKNOWN__.toString()));
     }
-
 
     @Override
     public String getPluginName() {
@@ -58,10 +57,9 @@ public abstract class DefaultPluginConfig implements PluginConfig {
     @Override
     public abstract PluginLanguage getPluginLanguage();
 
-
     protected abstract void validate() throws PluginConfigException;
 
-        @Override
+    @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;

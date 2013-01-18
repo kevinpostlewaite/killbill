@@ -17,7 +17,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>killbill-osgi</artifactId>
-    <name>killbill-osgi</name>
+    <name>Killbill billing platform: OSGI framework</name>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>

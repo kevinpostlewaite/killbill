@@ -31,9 +31,13 @@ public class DefaultPluginJavaConfig extends DefaultPluginConfig implements Plug
         validate();
     }
 
-
     private String extractJarPath(final File pluginVersionRoot) {
-        for (File f : pluginVersionRoot.listFiles()) {
+        final File[] files = pluginVersionRoot.listFiles();
+        if (files == null) {
+            return null;
+        }
+
+        for (final File f : files) {
             if (f.isFile() && f.getName().endsWith(".jar")) {
                 return f.getAbsolutePath();
             }

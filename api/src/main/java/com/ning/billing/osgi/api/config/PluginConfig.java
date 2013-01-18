@@ -20,7 +20,8 @@ public interface PluginConfig {
 
     public enum PluginType {
         PAYMENT,
-        NOTIFICATION
+        NOTIFICATION,
+        __UNKNOWN__
     }
 
     public enum PluginLanguage {

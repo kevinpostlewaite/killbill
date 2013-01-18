@@ -14,7 +14,7 @@
  * under the License.
  */
 
-package com.ning.billing.osgi.jruby;
+package com.ning.billing.osgi.bundles.jruby;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,7 +53,7 @@ import com.ning.billing.util.api.TagUserApi;
 
 public class Activator implements BundleActivator {
 
-    private final List<ServiceReference> serviceReferences = new ArrayList<ServiceReference>();
+    private final List<ServiceReference<?>> serviceReferences = new ArrayList<ServiceReference<?>>();
 
     private LogService logger = null;
     private JRubyPlugin plugin = null;
@@ -82,8 +82,9 @@ public class Activator implements BundleActivator {
     }
 
     private PluginRubyConfig retrievePluginRubyConfig(final BundleContext context) {
-        final ServiceReference pluginConfigServiceApiServiceReference = context.getServiceReference(PluginConfigServiceApi.class.getName());
-        final PluginConfigServiceApi pluginConfigServiceApi = (PluginConfigServiceApi) context.getService(pluginConfigServiceApiServiceReference);
+        @SuppressWarnings("unchecked")
+        final ServiceReference<PluginConfigServiceApi> pluginConfigServiceApiServiceReference = (ServiceReference<PluginConfigServiceApi>) context.getServiceReference(PluginConfigServiceApi.class.getName());
+        final PluginConfigServiceApi pluginConfigServiceApi = context.getService(pluginConfigServiceApiServiceReference);
         return pluginConfigServiceApi.getPluginRubyConfig(context.getBundle().getBundleId());
     }
 
@@ -153,12 +154,12 @@ public class Activator implements BundleActivator {
      * @return instance of the service class
      */
     private <T> T retrieveApi(final BundleContext context, final Class<T> clazz) {
-        final ServiceReference apiReference = context.getServiceReference(clazz.getName());
+        final ServiceReference<T> apiReference = context.getServiceReference(clazz);
         if (apiReference != null) {
             // Keep references to stop the bundle properly
             serviceReferences.add(apiReference);
 
-            return (T) context.getService(apiReference);
+            return context.getService(apiReference);
         } else {
             return null;
         }

@@ -168,7 +168,6 @@ public class PluginFinder {
             }
 
             for (final File cur : files) {
-
                 if (cur.isFile() && cur.getName().equals(INSTALATION_PROPERTIES)) {
                     props = readPluginConfigurationFile(cur);
                 }

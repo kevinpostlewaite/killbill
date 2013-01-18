@@ -14,7 +14,7 @@
  * under the License.
  */
 
-package com.ning.billing.bundles.hello;
+package com.ning.billing.osgi.bundles.hello;
 
 import java.math.BigDecimal;
 import java.util.Dictionary;
@@ -24,9 +24,6 @@ import java.util.UUID;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
@@ -43,35 +40,51 @@ import com.ning.billing.util.callcontext.TenantContext;
 
 import com.google.common.eventbus.Subscribe;
 
-public class HelloActivator implements BundleActivator, ServiceListener {
+public class HelloActivator implements BundleActivator {
 
     private volatile boolean isRunning;
     private volatile ServiceRegistration paymentInfoPluginRegistration;
 
-    private void sayHello(final BundleContext context) {
-        System.out.println("sayHello ENTER");
+    @Override
+    public void start(final BundleContext context) {
         isRunning = true;
+        System.out.println("Hello world from HelloActivator!");
+
+        doSomeWorkWithKillbillApis(context);
+        registerForKillbillEvents(context);
+        registerPaymentApi(context);
+    }
+
+    @Override
+    public void stop(final BundleContext context) {
+        isRunning = false;
+        System.out.println("Good bye world from HelloActivator!");
+    }
+
+    private void doSomeWorkWithKillbillApis(final BundleContext context) {
+        final TenantContext tenantContext = new TenantContext() {
+            @Override
+            public UUID getTenantId() {
+                return new UUID(12, 42);
+            }
+        };
+
         final Thread th = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (isRunning) {
+                    @SuppressWarnings("unchecked")
                     final ServiceReference<AccountUserApi> accountUserApiReference = (ServiceReference<AccountUserApi>) context.getServiceReference(AccountUserApi.class.getName());
                     final AccountUserApi accountUserApi = context.getService(accountUserApiReference);
+
                     try {
-                        Account account = accountUserApi.getAccountById(UUID.fromString("05cb5ea1-8136-496c-b2d8-8ca489b27874"), new TenantContext() {
-                            @Override
-                            public UUID getTenantId() {
-                                return null;
-                            }
-                        });
-                        System.out.println("HelloActivator : account = " + account == null ? "null" : account.getExternalKey());
+                        final List<Account> accounts = accountUserApi.getAccounts(tenantContext);
+                        System.out.println("Found " + accounts.size() + " accounts");
                         Thread.sleep(1000);
-
-
                     } catch (InterruptedException e) {
-                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                        System.err.println("Interrupted in HelloActivator");
                     } catch (Exception e) {
-                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                        System.err.println("Error in HelloActivator: " + e.getLocalizedMessage());
                     } finally {
                         if (accountUserApiReference != null) {
                             context.ungetService(accountUserApiReference);
@@ -81,18 +94,16 @@ public class HelloActivator implements BundleActivator, ServiceListener {
             }
         });
         th.start();
-        System.out.println("sayHello EXIT");
-
     }
 
     private void registerForKillbillEvents(final BundleContext context) {
-
+        @SuppressWarnings("unchecked")
         final ServiceReference<ExternalBus> externalBusReference = (ServiceReference<ExternalBus>) context.getServiceReference(ExternalBus.class.getName());
         try {
             final ExternalBus externalBus = context.getService(externalBusReference);
             externalBus.register(this);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error in HelloActivator: " + e.getLocalizedMessage());
         } finally {
             if (externalBusReference != null) {
                 context.ungetService(externalBusReference);
@@ -100,23 +111,7 @@ public class HelloActivator implements BundleActivator, ServiceListener {
         }
     }
 
-    /**
-     * Implements BundleActivator.start(). Prints
-     * a message and adds itself to the bundle context as a service
-     * listener.
-     *
-     * @param context the framework context for the bundle.
-     */
-    public void start(BundleContext context) {
-        System.out.println("Starting to listen for service events.");
-        context.addServiceListener(this);
-        sayHello(context);
-        registerForKillbillEvents(context);
-        registerPaymentApi(context);
-    }
-
-
-    private void registerPaymentApi(BundleContext context) {
+    private void registerPaymentApi(final BundleContext context) {
         final Dictionary props = new Hashtable();
         props.put("name", "hello");
 
@@ -182,25 +177,5 @@ public class HelloActivator implements BundleActivator, ServiceListener {
     @Subscribe
     public void handleKillbillEvent(final ExtBusEvent killbillEvent) {
         System.out.println("Received external event " + killbillEvent.toString());
-    }
-
-    /**
-     * Implements BundleActivator.stop(). Prints
-     * a message and removes itself from the bundle context as a
-     * service listener.
-     *
-     * @param context the framework context for the bundle.
-     */
-    public void stop(BundleContext context) {
-        context.removeServiceListener(this);
-        System.out.println("Stopped listening for service events.");
-        isRunning = false;
-        // Note: It is not required that we remove the listener here,
-        // since the framework will do it automatically anyway.
-    }
-
-
-    @Override
-    public void serviceChanged(final ServiceEvent serviceEvent) {
     }
 }

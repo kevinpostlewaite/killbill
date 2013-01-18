@@ -14,7 +14,7 @@
  * under the License.
  */
 
-package com.ning.billing.osgi.jruby;
+package com.ning.billing.osgi.bundles.jruby;
 
 import javax.annotation.Nullable;
 
@@ -39,9 +39,10 @@ public class JRubyNotificationPlugin extends JRubyPlugin {
     public void startPlugin(final BundleContext context) {
         super.startPlugin(context);
 
-        final ServiceReference externalBusReference = context.getServiceReference(ExternalBus.class.getName());
+        @SuppressWarnings("unchecked")
+        final ServiceReference<ExternalBus> externalBusReference = (ServiceReference<ExternalBus>) context.getServiceReference(ExternalBus.class.getName());
         try {
-            final ExternalBus externalBus = (ExternalBus) context.getService(externalBusReference);
+            final ExternalBus externalBus = context.getService(externalBusReference);
             externalBus.register(this);
         } catch (Exception e) {
             if (logger != null) {

@@ -14,7 +14,7 @@
  * under the License.
  */
 
-package com.ning.billing.osgi.jruby;
+package com.ning.billing.osgi.bundles.jruby;
 
 import java.util.Arrays;
 import java.util.Map;

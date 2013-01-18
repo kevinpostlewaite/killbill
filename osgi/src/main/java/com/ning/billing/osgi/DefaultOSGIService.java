@@ -89,7 +89,7 @@ public class DefaultOSGIService implements OSGIService {
             // This will call the start() method for the bundles
             installAndStartBundles(framework);
         } catch (BundleException e) {
-            logger.error("Failed to initialize Killbill OSGIService " + e.getMessage());
+            logger.error("Failed to initialize Killbill OSGIService", e);
         }
     }
 
@@ -140,7 +140,7 @@ public class DefaultOSGIService implements OSGIService {
         final List<PluginJavaConfig> pluginJavaConfigs = pluginFinder.getLatestJavaPlugins();
         for (final PluginJavaConfig cur : pluginJavaConfigs) {
             logger.info("Installing Java bundle for plugin {} in {}", cur.getPluginName(), cur.getBundleJarPath());
-            final Bundle bundle = context.installBundle(cur.getBundleJarPath());
+            final Bundle bundle = context.installBundle("file:" + cur.getBundleJarPath());
             ((DefaultPluginConfigServiceApi) pluginConfigServiceApi).registerBundle(bundle.getBundleId(), cur);
             installedBundles.add(bundle);
         }

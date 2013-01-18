@@ -15,17 +15,18 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.ning.billing</groupId>
-        <artifactId>killbill</artifactId>
+        <artifactId>killbill-osgi-bundles</artifactId>
         <version>0.1.51-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>killbill-osgi-jruby-bundle</artifactId>
-    <name>killbill-osgi-jruby-bundle</name>
+    <artifactId>killbill-osgi-bundles-hello</artifactId>
+    <name>Killbill billing platform: OSGI Hello World bundle</name>
     <packaging>bundle</packaging>
     <dependencies>
         <dependency>
@@ -37,12 +38,7 @@
             <artifactId>killbill-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jruby</groupId>
-            <artifactId>jruby-complete</artifactId>
-            <version>1.7.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
+            <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
         </dependency>
         <dependency>
@@ -68,9 +64,9 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-Activator>com.ning.billing.osgi.jruby.Activator</Bundle-Activator>
+                        <Bundle-Activator>com.ning.billing.osgi.bundles.hello.HelloActivator</Bundle-Activator>
                         <Import-Package>
-                            *;resolution:=optional,org.osgi.service.log;resolution:=optional,org.jruby;resolution:=optional;version="[1.7,2)",javax.management,javax.crypto,javax.net.ssl,javax.security.auth.x500;resolution:=optional
+                            *;resolution:=optional
                         </Import-Package>
                     </instructions>
                 </configuration>
@@ -86,10 +82,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>1.4</version>
                 <executions>
                     <execution>
-                        <id>assemble-killbill-osgi-jruby-bundle</id>
+                        <id>assemble-killbill-osgi-bundles-hello</id>
                         <goals>
                             <goal>shade</goal>
                         </goals>

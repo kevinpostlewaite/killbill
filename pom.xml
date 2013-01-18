@@ -502,6 +502,7 @@
                                 <!-- For some reason, useIdeaDefaultExcludes 
                                     doesn't pick up .idea directory -->
                                 <exclude>.idea/**</exclude>
+                                <exclude>**/*.iml</exclude>
                                 <exclude>**/.project</exclude>
                                 <exclude>.git/**</exclude>
                                 <exclude>.gitignore</exclude>

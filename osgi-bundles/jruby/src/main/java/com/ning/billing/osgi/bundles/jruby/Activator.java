@@ -17,6 +17,7 @@
 package com.ning.billing.osgi.bundles.jruby;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,15 +63,16 @@ public class Activator implements BundleActivator {
         logger = retrieveApi(context, LogService.class);
         log(LogService.LOG_INFO, "JRuby bundle activated");
 
+        doMagicToMakeJRubyAndFelixHappy();
+
         final ScriptingContainer scriptingContainer = setupScriptingContainer();
-        scriptingContainer.runScriptlet("puts 'it works'");
 
         // Retrieve the plugin config
         final PluginRubyConfig rubyConfig = retrievePluginRubyConfig(context);
         if (PluginType.NOTIFICATION.equals(rubyConfig.getPluginType())) {
-            plugin = new JRubyNotificationPlugin(rubyConfig, logger);
+            plugin = new JRubyNotificationPlugin(rubyConfig, scriptingContainer, logger);
         } else if (PluginType.PAYMENT.equals(rubyConfig.getPluginType())) {
-            plugin = new JRubyPaymentPlugin(rubyConfig, logger);
+            plugin = new JRubyPaymentPlugin(rubyConfig, scriptingContainer, logger);
         }
 
         // Validate and instantiate the plugin
@@ -90,20 +92,16 @@ public class Activator implements BundleActivator {
 
     // JRuby/Felix specifics, it works out of the box on Equinox.
     // Other OSGI frameworks are untested.
-    private ScriptingContainer setupScriptingContainer() {
+    private void doMagicToMakeJRubyAndFelixHappy() {
         // Tell JRuby to use the correct class loader
         Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+    }
 
+    private ScriptingContainer setupScriptingContainer() {
         final ScriptingContainer scriptingContainer = new ScriptingContainer();
 
-        final ArrayList<String> loadPaths = new ArrayList<String>();
-        // TODO Needed? For Equinox maybe
-        loadPaths.add("classpath:/");
-        // Needed for Felix, not for Equinox
-        // TODO Be smarter
-        loadPaths.add("bundle://1.0:1");
         // Set the load paths instead of adding, to avoid looking at the filesystem
-        scriptingContainer.setLoadPaths(loadPaths);
+        scriptingContainer.setLoadPaths(Collections.<String>emptyList());
 
         return scriptingContainer;
     }

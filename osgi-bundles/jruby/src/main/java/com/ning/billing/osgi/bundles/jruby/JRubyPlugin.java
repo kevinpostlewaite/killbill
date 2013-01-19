@@ -49,10 +49,10 @@ public abstract class JRubyPlugin {
 
     protected RubyObject pluginInstance;
 
-    public JRubyPlugin(final PluginRubyConfig config, @Nullable final LogService logger) {
+    public JRubyPlugin(final PluginRubyConfig config, final ScriptingContainer container, @Nullable final LogService logger) {
         this.logger = logger;
         this.pluginMainClass = config.getRubyMainClass();
-        this.container = new ScriptingContainer();
+        this.container = container;
         this.pluginLibdir = config.getRubyLoadDir();
 
         // Path to the gem
@@ -139,5 +139,17 @@ public abstract class JRubyPlugin {
 
     protected Ruby getRuntime() {
         return pluginInstance.getMetaClass().getRuntime();
+    }
+
+    protected void log(final int level, final String message) {
+        if (logger != null) {
+            logger.log(level, message);
+        }
+    }
+
+    protected void log(final int level, final String message, final Throwable throwable) {
+        if (logger != null) {
+            logger.log(level, message, throwable);
+        }
     }
 }

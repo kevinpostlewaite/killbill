@@ -25,6 +25,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import org.jruby.Ruby;
+import org.jruby.embed.ScriptingContainer;
 import org.jruby.javasupport.JavaEmbedUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -43,8 +44,8 @@ public class JRubyPaymentPlugin extends JRubyPlugin implements PaymentPluginApi 
 
     private volatile ServiceRegistration<PaymentPluginApi> paymentInfoPluginRegistration;
 
-    public JRubyPaymentPlugin(final PluginRubyConfig config, @Nullable final LogService logger) {
-        super(config, logger);
+    public JRubyPaymentPlugin(final PluginRubyConfig config, final ScriptingContainer container, @Nullable final LogService logger) {
+        super(config, container, logger);
     }
 
     @Override

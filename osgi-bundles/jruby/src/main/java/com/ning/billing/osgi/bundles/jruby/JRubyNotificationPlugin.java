@@ -18,6 +18,7 @@ package com.ning.billing.osgi.bundles.jruby;
 
 import javax.annotation.Nullable;
 
+import org.jruby.embed.ScriptingContainer;
 import org.jruby.javasupport.JavaEmbedUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -31,8 +32,8 @@ import com.google.common.eventbus.Subscribe;
 
 public class JRubyNotificationPlugin extends JRubyPlugin {
 
-    public JRubyNotificationPlugin(final PluginRubyConfig config, @Nullable final LogService logger) {
-        super(config, logger);
+    public JRubyNotificationPlugin(final PluginRubyConfig config, final ScriptingContainer container, @Nullable final LogService logger) {
+        super(config, container, logger);
     }
 
     @Override
@@ -45,9 +46,7 @@ public class JRubyNotificationPlugin extends JRubyPlugin {
             final ExternalBus externalBus = context.getService(externalBusReference);
             externalBus.register(this);
         } catch (Exception e) {
-            if (logger != null) {
-                logger.log(LogService.LOG_WARNING, "Error registering notification plugin service", e);
-            }
+            log(LogService.LOG_WARNING, "Error registering notification plugin service", e);
         } finally {
             if (externalBusReference != null) {
                 context.ungetService(externalBusReference);

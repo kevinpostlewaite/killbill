@@ -28,18 +28,40 @@
       overflowToDisk="false"
       />
 
-  <cache name="record-id"
-         maxElementsInMemory="10000"
-         maxElementsOnDisk="0"
-         eternal="false"
-         overflowToDisk="false"
-         timeToIdleSeconds="3600"
-         timeToLiveSeconds="7200"
-         diskPersistent="false"
-         memoryStoreEvictionPolicy="LFU">
-    <cacheEventListenerFactory
-        class="com.ning.billing.util.cache.ExpirationListenerFactory"
-        properties="" />
-  </cache>
+    <cache name="record-id"
+           maxElementsInMemory="100000"
+           maxElementsOnDisk="0"
+           eternal="true"
+           overflowToDisk="false"
+           diskPersistent="false"
+           memoryStoreEvictionPolicy="LFU">
+        <cacheEventListenerFactory
+                class="com.ning.billing.util.cache.ExpirationListenerFactory"
+                properties="" />
+    </cache>
+
+    <cache name="tenant-record-id"
+           maxElementsInMemory="100000"
+           maxElementsOnDisk="0"
+           eternal="true"
+           overflowToDisk="false"
+           diskPersistent="false"
+           memoryStoreEvictionPolicy="LFU">
+        <cacheEventListenerFactory
+                class="com.ning.billing.util.cache.ExpirationListenerFactory"
+                properties="" />
+    </cache>
+
+    <cache name="account-record-id"
+           maxElementsInMemory="100000"
+           maxElementsOnDisk="0"
+           eternal="true"
+           overflowToDisk="false"
+           diskPersistent="false"
+           memoryStoreEvictionPolicy="LFU">
+        <cacheEventListenerFactory
+                class="com.ning.billing.util.cache.ExpirationListenerFactory"
+                properties="" />
+    </cache>
 </ehcache>
 

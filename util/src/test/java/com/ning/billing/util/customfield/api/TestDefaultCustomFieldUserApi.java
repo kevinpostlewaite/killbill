@@ -36,6 +36,8 @@ import com.ning.billing.util.customfield.CustomField;
 import com.ning.billing.util.customfield.StringCustomField;
 import com.ning.billing.util.customfield.dao.DefaultCustomFieldDao;
 import com.ning.billing.util.customfield.dao.CustomFieldDao;
+import com.ning.billing.util.dao.DefaultNonEntityDao;
+import com.ning.billing.util.dao.NonEntityDao;
 
 import com.google.common.collect.ImmutableList;
 
@@ -47,7 +49,8 @@ public class TestDefaultCustomFieldUserApi extends UtilTestSuiteWithEmbeddedDB {
 
     @BeforeMethod(groups = "slow")
     public void setUp() throws Exception {
-        final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(getDBI(), new ClockMock());
+        final NonEntityDao nonEntityDao = new DefaultNonEntityDao(getDBI());
+        final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(getDBI(), new ClockMock(), nonEntityDao, controllerDispatcher);
         final CustomFieldDao customFieldDao = new DefaultCustomFieldDao(getDBI(), clock, controllerDispatcher);
         customFieldUserApi = new DefaultCustomFieldUserApi(internalCallContextFactory, customFieldDao);
     }

@@ -47,6 +47,8 @@ import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.callcontext.InternalCallContextFactory;
 import com.ning.billing.util.clock.Clock;
 import com.ning.billing.util.clock.ClockMock;
+import com.ning.billing.util.dao.DefaultNonEntityDao;
+import com.ning.billing.util.dao.NonEntityDao;
 import com.ning.billing.util.svcapi.invoice.InvoiceInternalApi;
 import com.ning.billing.util.svcsapi.bus.InternalBus;
 
@@ -80,8 +82,9 @@ public class TestDefaultInvoicePaymentApi extends InvoiceTestSuiteWithEmbeddedDB
         invoiceItemSqlDao = dbi.onDemand(InvoiceItemSqlDao.class);
         invoiceItemSqlDao.test(internalCallContext);
 
+        final NonEntityDao nonEntityDao = new DefaultNonEntityDao(dbi);
         final NextBillingDatePoster nextBillingDatePoster = new MockNextBillingDatePoster();
-        internalCallContextFactory = new InternalCallContextFactory(dbi, clock);
+        internalCallContextFactory = new InternalCallContextFactory(dbi, clock, nonEntityDao, controllerDispatcher);
         final InvoiceDao invoiceDao = new DefaultInvoiceDao(dbi, nextBillingDatePoster, Mockito.mock(InternalBus.class), clock, controllerDispatcher);
         invoicePaymentApi = new DefaultInvoicePaymentApi(invoiceDao, internalCallContextFactory);
         invoiceInternalApi = new DefaultInvoiceInternalApi(invoiceDao);

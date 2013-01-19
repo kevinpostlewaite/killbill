@@ -66,6 +66,7 @@ import com.ning.billing.util.glue.CacheModule;
 import com.ning.billing.util.glue.CallContextModule;
 import com.ning.billing.util.glue.CustomFieldModule;
 import com.ning.billing.util.glue.ExportModule;
+import com.ning.billing.util.glue.NonEntityDaoModule;
 import com.ning.billing.util.glue.NotificationQueueModule;
 import com.ning.billing.util.glue.TagStoreModule;
 import com.ning.http.client.AsyncHttpClient;
@@ -168,6 +169,7 @@ public class TestJaxrsBase extends KillbillClient {
             */
             install(new EmailModule());
             install(new CacheModule());
+            install(new NonEntityDaoModule());
             install(new TestGlobalLockerModule(helper));
             install(new CustomFieldModule());
             install(new TagStoreModule());

@@ -36,13 +36,14 @@ import com.ning.billing.util.events.BusInternalEvent;
 import com.ning.billing.util.events.TagDefinitionInternalEvent;
 import com.ning.billing.util.glue.CacheModule;
 import com.ning.billing.util.glue.ClockModule;
+import com.ning.billing.util.glue.NonEntityDaoModule;
 import com.ning.billing.util.glue.TagStoreModule;
 import com.ning.billing.util.svcsapi.bus.InternalBus;
 
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 
-@Guice(modules = {TagStoreModule.class, CacheModule.class, ClockModule.class, InMemoryBusModule.class, MockDbHelperModule.class})
+@Guice(modules = {TagStoreModule.class, CacheModule.class, ClockModule.class, InMemoryBusModule.class, MockDbHelperModule.class, NonEntityDaoModule.class})
 public class TestDefaultTagDefinitionDao extends UtilTestSuiteWithEmbeddedDB {
 
     @Inject

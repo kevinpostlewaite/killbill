@@ -42,6 +42,7 @@ import com.ning.billing.util.entity.dao.EntitySqlDaoTransactionWrapper;
 import com.ning.billing.util.entity.dao.EntitySqlDaoTransactionalJdbiWrapper;
 import com.ning.billing.util.entity.dao.EntitySqlDaoWrapperFactory;
 import com.ning.billing.util.glue.CacheModule;
+import com.ning.billing.util.glue.NonEntityDaoModule;
 import com.ning.billing.util.io.IOUtils;
 import com.ning.billing.util.notificationq.NotificationQueueService.NotificationQueueHandler;
 import com.ning.billing.util.notificationq.dao.NotificationSqlDao;
@@ -58,7 +59,7 @@ import static com.jayway.awaitility.Awaitility.await;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.testng.Assert.assertEquals;
 
-@Guice(modules = {TestNotificationQueue.TestNotificationQueueModule.class, CacheModule.class})
+@Guice(modules = {TestNotificationQueue.TestNotificationQueueModule.class, CacheModule.class, NonEntityDaoModule.class})
 public class TestNotificationQueue extends UtilTestSuiteWithEmbeddedDB {
 
     private final Logger log = LoggerFactory.getLogger(TestNotificationQueue.class);

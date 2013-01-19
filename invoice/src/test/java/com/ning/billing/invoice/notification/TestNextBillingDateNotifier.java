@@ -51,6 +51,7 @@ import com.ning.billing.util.callcontext.InternalTenantContext;
 import com.ning.billing.util.clock.Clock;
 import com.ning.billing.util.clock.ClockMock;
 import com.ning.billing.util.config.InvoiceConfig;
+import com.ning.billing.util.dao.NonEntityDao;
 import com.ning.billing.util.email.templates.TemplateModule;
 import com.ning.billing.util.entity.dao.EntitySqlDao;
 import com.ning.billing.util.entity.dao.EntitySqlDaoTransactionWrapper;
@@ -59,6 +60,7 @@ import com.ning.billing.util.entity.dao.EntitySqlDaoWrapperFactory;
 import com.ning.billing.util.glue.BusModule;
 import com.ning.billing.util.glue.BusModule.BusType;
 import com.ning.billing.util.glue.CacheModule;
+import com.ning.billing.util.glue.NonEntityDaoModule;
 import com.ning.billing.util.glue.NotificationQueueModule;
 import com.ning.billing.util.glue.TagStoreModule;
 import com.ning.billing.util.notificationq.NotificationQueueService;
@@ -129,6 +131,7 @@ public class TestNextBillingDateNotifier extends InvoiceTestSuiteWithEmbeddedDB 
                 install(new TemplateModule());
                 install(new TagStoreModule());
                 install(new CacheModule());
+                install(new NonEntityDaoModule());
 
                 final DBTestingHelper helper = KillbillTestSuiteWithEmbeddedDB.getDBTestingHelper();
                 if (helper.isUsingLocalInstance()) {
@@ -140,9 +143,10 @@ public class TestNextBillingDateNotifier extends InvoiceTestSuiteWithEmbeddedDB 
                     bind(IDBI.class).toInstance(dbi);
                 }
 
-                final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(helper.getDBI(), clock);
+                /*
+                final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(helper.getDBI(), clock, nonEntityDao);
                 bind(InternalCallContextFactory.class).toInstance(internalCallContextFactory);
-
+*/
                 bind(InvoiceFormatterFactory.class).to(DefaultInvoiceFormatterFactory.class).asEagerSingleton();
 
                 bind(AccountInternalApi.class).toInstance(Mockito.mock(AccountInternalApi.class));

@@ -68,6 +68,7 @@ public class EntitySqlDaoWrapperInvocationHandler<S extends EntitySqlDao<M, E>, 
 
     private final Class<S> sqlDaoClass;
     private final S sqlDao;
+
     private final CacheControllerDispatcher cacheControllerDispatcher;
     private final Clock clock;
 

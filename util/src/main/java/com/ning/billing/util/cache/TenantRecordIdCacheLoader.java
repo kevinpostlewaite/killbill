@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2012 Ning, Inc.
+ * Copyright 2010-2013 Ning, Inc.
  *
  * Ning licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -25,18 +25,17 @@ import org.skife.jdbi.v2.IDBI;
 import com.ning.billing.ObjectType;
 import com.ning.billing.util.dao.NonEntityDao;
 
-import net.sf.ehcache.CacheException;
 import net.sf.ehcache.loader.CacheLoader;
 
-public class RecordIdCacheLoader extends BaseCacheLoader implements CacheLoader {
+public class TenantRecordIdCacheLoader  extends BaseCacheLoader implements CacheLoader {
 
     @Inject
-    public RecordIdCacheLoader(final IDBI dbi, final NonEntityDao nonEntityDao) {
+    public TenantRecordIdCacheLoader(final IDBI dbi, final NonEntityDao nonEntityDao) {
         super(dbi, nonEntityDao);
     }
 
     @Override
-    public Object load(final Object key, final Object argument) throws CacheException {
+    public Object load(final Object key, final Object argument) {
 
         checkCacheLoaderStatus();
 
@@ -51,7 +50,7 @@ public class RecordIdCacheLoader extends BaseCacheLoader implements CacheLoader 
         }
         final String objectId = (String) key;
         final ObjectType objectType = (ObjectType) argument;
-        Long value = nonEntityDao.retrieveRecordIdFromObject(UUID.fromString(objectId), objectType, null);
+        Long value = nonEntityDao.retrieveTenantRecordIdFromObject(UUID.fromString(objectId), objectType, null);
         return value;
     }
 }

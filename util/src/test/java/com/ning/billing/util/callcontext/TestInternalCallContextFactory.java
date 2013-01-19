@@ -27,15 +27,22 @@ import org.testng.annotations.Test;
 
 import com.ning.billing.ObjectType;
 import com.ning.billing.util.UtilTestSuiteWithEmbeddedDB;
+import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.clock.ClockMock;
+import com.ning.billing.util.dao.DefaultNonEntityDao;
+import com.ning.billing.util.dao.NonEntityDao;
 
 public class TestInternalCallContextFactory extends UtilTestSuiteWithEmbeddedDB {
 
     private InternalCallContextFactory internalCallContextFactory;
+    private CacheControllerDispatcher cacheControllerDispatcher;
+    private NonEntityDao nonEntityDao;
 
     @BeforeMethod(groups = "slow")
     public void setUp() throws Exception {
-        internalCallContextFactory = new InternalCallContextFactory(getDBI(), new ClockMock());
+        cacheControllerDispatcher =  new CacheControllerDispatcher();
+        nonEntityDao = new DefaultNonEntityDao(getDBI());
+        internalCallContextFactory = new InternalCallContextFactory(getDBI(), new ClockMock(), nonEntityDao, cacheControllerDispatcher);
     }
 
     @Test(groups = "slow")

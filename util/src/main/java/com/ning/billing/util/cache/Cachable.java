@@ -27,11 +27,21 @@ import java.util.UUID;
 public @interface Cachable {
 
     public final String RECORD_ID_CACHE_NAME = "record-id";
+    public final String ACCOUNT_RECORD_ID_CACHE_NAME = "account-record-id";
+    public final String TENANT_RECORD_ID_CACHE_NAME = "tenant-record-id";
 
     public CacheType value();
 
     public enum CacheType {
-        RECORD_ID(RECORD_ID_CACHE_NAME, UUID.class, Long.class);
+        /* Mapping from object 'id (UUID)' -> object 'recordId (Long' */
+        RECORD_ID(RECORD_ID_CACHE_NAME, UUID.class, Long.class),
+
+        /* Mapping from object 'id (UUID)' -> matching account object 'accountRecordId (Long)' */
+        ACCOUNT_RECORD_ID(ACCOUNT_RECORD_ID_CACHE_NAME, UUID.class, Long.class),
+
+
+        /* Mapping from object 'id (UUID)' -> matching object 'tenantRecordId (Long)' */
+        TENANT_RECORD_ID(TENANT_RECORD_ID_CACHE_NAME, UUID.class, Long.class);
 
         private final String cacheName;
         private final Class key;

@@ -32,9 +32,13 @@ public class CacheControllerDispatcher {
     private final Map<CacheType, CacheController<?,?>> caches;
 
     @Inject
-    public CacheControllerDispatcher(@Named(Cachable.RECORD_ID_CACHE_NAME) final CacheController<UUID, Long> recordIdCacheController) {
+    public CacheControllerDispatcher(@Named(Cachable.RECORD_ID_CACHE_NAME) final CacheController<UUID, Long> recordIdCacheController,
+                                     @Named(Cachable.ACCOUNT_RECORD_ID_CACHE_NAME) final CacheController<UUID, Long> accountRecordIdCacheController,
+                                     @Named(Cachable.TENANT_RECORD_ID_CACHE_NAME) final CacheController<UUID, Long> tenantRecordIdCacheController) {
         caches = new HashMap<CacheType, CacheController<?, ?>>();
         caches.put(recordIdCacheController.getType(), recordIdCacheController);
+        caches.put(accountRecordIdCacheController.getType(), accountRecordIdCacheController);
+        caches.put(tenantRecordIdCacheController.getType(), tenantRecordIdCacheController);
     }
 
     // Test only

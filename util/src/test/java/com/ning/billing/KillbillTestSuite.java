@@ -25,7 +25,6 @@ import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
-import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.callcontext.CallContext;
 import com.ning.billing.util.callcontext.CallOrigin;
 import com.ning.billing.util.callcontext.InternalCallContext;
@@ -60,8 +59,8 @@ public class KillbillTestSuite {
     public void endTestSuite(final Method method, final ITestResult result) throws Exception {
         log.info("***************************************************************************************************");
         log.info("***   Ending test {}:{} {} ({} s.)", new Object[]{method.getDeclaringClass().getName(), method.getName(),
-                                                                    result.isSuccess() ? "SUCCESS" : "!!! FAILURE !!!",
-                                                                    (result.getEndMillis() - result.getStartMillis()) / 1000});
+                result.isSuccess() ? "SUCCESS" : "!!! FAILURE !!!",
+                (result.getEndMillis() - result.getStartMillis()) / 1000});
         log.info("***************************************************************************************************");
         if (!hasFailed && !result.isSuccess()) {
             hasFailed = true;

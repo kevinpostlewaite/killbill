@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2012 Ning, Inc.
+ * Copyright 2010-2013 Ning, Inc.
  *
  * Ning licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import org.skife.config.ConfigurationObjectFactory;
 
+import com.ning.billing.util.cache.AccountRecordIdCacheLoader;
 import com.ning.billing.util.cache.Cachable;
 import com.ning.billing.util.cache.Cachable.CacheType;
 import com.ning.billing.util.cache.CacheController;
@@ -27,6 +28,7 @@ import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.cache.CacheControllerProvider;
 import com.ning.billing.util.cache.CacheManagerProvider;
 import com.ning.billing.util.cache.RecordIdCacheLoader;
+import com.ning.billing.util.cache.TenantRecordIdCacheLoader;
 import com.ning.billing.util.config.CacheConfig;
 
 import com.google.inject.AbstractModule;
@@ -41,6 +43,8 @@ public class CacheModule extends AbstractModule {
 
 
     public static final Named RECORD_ID_CACHE_NAMED = Names.named(Cachable.RECORD_ID_CACHE_NAME);
+    public static final Named ACCOUNT_RECORD_ID_CACHE_NAMED = Names.named(Cachable.ACCOUNT_RECORD_ID_CACHE_NAME);
+    public static final Named TENANT_RECORD_ID_CACHE_NAMED = Names.named(Cachable.TENANT_RECORD_ID_CACHE_NAME);
 
     protected void installConfig() {
         final CacheConfig config = new ConfigurationObjectFactory(System.getProperties()).build(CacheConfig.class);
@@ -56,6 +60,12 @@ public class CacheModule extends AbstractModule {
 
         bind(CacheLoader.class).annotatedWith(RECORD_ID_CACHE_NAMED).to(RecordIdCacheLoader.class).asEagerSingleton();
         bind(new TypeLiteral<CacheController<UUID, Long>>() {}).annotatedWith(RECORD_ID_CACHE_NAMED).toProvider(new CacheControllerProvider<UUID, Long>(Cachable.RECORD_ID_CACHE_NAME)).asEagerSingleton();
+
+        bind(CacheLoader.class).annotatedWith(ACCOUNT_RECORD_ID_CACHE_NAMED).to(AccountRecordIdCacheLoader.class).asEagerSingleton();
+        bind(new TypeLiteral<CacheController<UUID, Long>>() {}).annotatedWith(ACCOUNT_RECORD_ID_CACHE_NAMED).toProvider(new CacheControllerProvider<UUID, Long>(Cachable.ACCOUNT_RECORD_ID_CACHE_NAME)).asEagerSingleton();
+
+        bind(CacheLoader.class).annotatedWith(TENANT_RECORD_ID_CACHE_NAMED).to(TenantRecordIdCacheLoader.class).asEagerSingleton();
+        bind(new TypeLiteral<CacheController<UUID, Long>>() {}).annotatedWith(TENANT_RECORD_ID_CACHE_NAMED).toProvider(new CacheControllerProvider<UUID, Long>(Cachable.TENANT_RECORD_ID_CACHE_NAME)).asEagerSingleton();
 
         bind(CacheControllerDispatcher.class).asEagerSingleton();
     }

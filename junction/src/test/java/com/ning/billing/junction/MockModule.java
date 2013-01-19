@@ -22,6 +22,7 @@ import com.ning.billing.mock.glue.MockClockModule;
 import com.ning.billing.mock.glue.MockDbHelperModule;
 import com.ning.billing.util.glue.CacheModule;
 import com.ning.billing.util.glue.CallContextModule;
+import com.ning.billing.util.glue.NonEntityDaoModule;
 
 public class MockModule extends DefaultJunctionModule {
     @Override
@@ -33,6 +34,7 @@ public class MockModule extends DefaultJunctionModule {
         install(new CallContextModule());
         install(new CatalogModule());
         install(new CacheModule());
+        install(new NonEntityDaoModule());
     }
 
     @Override

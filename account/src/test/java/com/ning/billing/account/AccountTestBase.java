@@ -46,6 +46,8 @@ import com.ning.billing.util.clock.Clock;
 import com.ning.billing.util.clock.ClockMock;
 import com.ning.billing.util.customfield.dao.CustomFieldDao;
 import com.ning.billing.util.customfield.dao.DefaultCustomFieldDao;
+import com.ning.billing.util.dao.DefaultNonEntityDao;
+import com.ning.billing.util.dao.NonEntityDao;
 import com.ning.billing.util.svcsapi.bus.BusService;
 import com.ning.billing.util.svcsapi.bus.InternalBus;
 import com.ning.billing.util.tag.api.user.TagEventBuilder;
@@ -68,6 +70,7 @@ public abstract class AccountTestBase extends AccountTestSuiteWithEmbeddedDB {
     protected TagDefinitionDao tagDefinitionDao;
     protected TagDao tagDao;
     protected CacheControllerDispatcher controllerDispatcher;
+    protected NonEntityDao nonEntityDao;
 
     protected AccountUserApi accountUserApi;
 
@@ -76,8 +79,9 @@ public abstract class AccountTestBase extends AccountTestSuiteWithEmbeddedDB {
         try {
             final IDBI dbi = getDBI();
 
-            final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(dbi, clock);
             controllerDispatcher = new CacheControllerDispatcher();
+            nonEntityDao = new DefaultNonEntityDao(dbi);
+            final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(dbi, clock, nonEntityDao, controllerDispatcher);
             accountDao = new DefaultAccountDao(dbi, bus, clock, controllerDispatcher, internalCallContextFactory);
             auditDao = new DefaultAuditDao(dbi);
             customFieldDao = new DefaultCustomFieldDao(dbi, clock, controllerDispatcher);
@@ -156,6 +160,7 @@ public abstract class AccountTestBase extends AccountTestSuiteWithEmbeddedDB {
     }
 
     private AccountData createAccountData(final int billCycleDayUTC, final int billCycleDayLocal, final String phone) {
+
         final String externalKey = UUID.randomUUID().toString();
         final String email = UUID.randomUUID().toString().substring(0, 4) + '@' + UUID.randomUUID().toString().substring(0, 4);
         final String name = UUID.randomUUID().toString();

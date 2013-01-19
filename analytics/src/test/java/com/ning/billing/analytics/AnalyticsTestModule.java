@@ -36,6 +36,7 @@ import com.ning.billing.util.glue.CacheModule;
 import com.ning.billing.util.glue.CallContextModule;
 import com.ning.billing.util.glue.ClockModule;
 import com.ning.billing.util.glue.CustomFieldModule;
+import com.ning.billing.util.glue.NonEntityDaoModule;
 import com.ning.billing.util.glue.NotificationQueueModule;
 import com.ning.billing.util.glue.TagStoreModule;
 import com.ning.billing.util.tag.dao.TagDefinitionSqlDao;
@@ -62,6 +63,7 @@ public class AnalyticsTestModule extends AnalyticsModule {
         install(new NotificationQueueModule());
         install(new DefaultJunctionModule());
         install(new CacheModule());
+        install(new NonEntityDaoModule());
 
         // Install the Dao layer
         final IDBI dbi = KillbillTestSuiteWithEmbeddedDB.getDBI();

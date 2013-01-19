@@ -65,10 +65,11 @@ public class Activator implements BundleActivator {
 
         doMagicToMakeJRubyAndFelixHappy();
 
-        final ScriptingContainer scriptingContainer = setupScriptingContainer();
-
         // Retrieve the plugin config
         final PluginRubyConfig rubyConfig = retrievePluginRubyConfig(context);
+
+        // Setup JRuby
+        final ScriptingContainer scriptingContainer = setupScriptingContainer(rubyConfig);
         if (PluginType.NOTIFICATION.equals(rubyConfig.getPluginType())) {
             plugin = new JRubyNotificationPlugin(rubyConfig, scriptingContainer, logger);
         } else if (PluginType.PAYMENT.equals(rubyConfig.getPluginType())) {
@@ -97,11 +98,11 @@ public class Activator implements BundleActivator {
         Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
     }
 
-    private ScriptingContainer setupScriptingContainer() {
+    private ScriptingContainer setupScriptingContainer(final PluginRubyConfig rubyConfig) {
         final ScriptingContainer scriptingContainer = new ScriptingContainer();
 
         // Set the load paths instead of adding, to avoid looking at the filesystem
-        scriptingContainer.setLoadPaths(Collections.<String>emptyList());
+        scriptingContainer.setLoadPaths(Collections.<String>singletonList(rubyConfig.getRubyLoadDir()));
 
         return scriptingContainer;
     }

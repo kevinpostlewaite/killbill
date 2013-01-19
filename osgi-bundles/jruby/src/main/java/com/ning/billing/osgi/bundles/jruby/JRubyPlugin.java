@@ -43,14 +43,18 @@ public abstract class JRubyPlugin {
     private static final String ACTIVE = "@active";
 
     protected final LogService logger;
+    protected final String pluginGemName;
     protected final String pluginMainClass;
     protected final ScriptingContainer container;
     protected final String pluginLibdir;
 
     protected RubyObject pluginInstance;
 
+    private String cachedRequireLine = null;
+
     public JRubyPlugin(final PluginRubyConfig config, final ScriptingContainer container, @Nullable final LogService logger) {
         this.logger = logger;
+        this.pluginGemName = config.getPluginName();
         this.pluginMainClass = config.getRubyMainClass();
         this.container = container;
         this.pluginLibdir = config.getRubyLoadDir();
@@ -131,10 +135,40 @@ public abstract class JRubyPlugin {
     }
 
     protected String checkInstanceOfPlugin(final String baseClass) {
-        return "ENV[\"GEM_HOME\"] = \"file:" + pluginLibdir + "\"\n" +
-               "ENV[\"GEM_PATH\"] = ENV[\"GEM_HOME\"]\n" +
-               "gem 'killbill'\n" +
-               "raise ArgumentError.new('Invalid plugin: " + pluginMainClass + ", is not a " + baseClass + "') unless " + pluginMainClass + " <= " + baseClass;
+        final StringBuilder builder = new StringBuilder(getRequireLine());
+        builder.append("raise ArgumentError.new('Invalid plugin: ")
+               .append(pluginMainClass)
+               .append(", is not a ")
+               .append(baseClass)
+               .append("') unless ")
+               .append(pluginMainClass)
+               .append(" <= ")
+               .append(baseClass);
+        return builder.toString();
+    }
+
+    private String getRequireLine() {
+        if (cachedRequireLine == null) {
+            final StringBuilder builder = new StringBuilder();
+            builder.append("ENV[\"GEM_HOME\"] = \"").append(pluginLibdir).append("\"").append("\n");
+            builder.append("ENV[\"GEM_PATH\"] = ENV[\"GEM_HOME\"]\n");
+            // Always require the Killbill gem
+            builder.append("gem 'killbill'\n");
+            builder.append("require 'killbill'\n");
+            // Assume the plugin is shipped as a Gem
+            builder.append("begin\n")
+                   .append("gem '").append(pluginGemName).append("'\n")
+                   .append("require '").append(pluginGemName).append("' rescue warn \"WARN: unable to load ").append(pluginGemName).append("\"\n")
+                   .append("rescue Gem::LoadError\n")
+                   .append("warn \"WARN: unable to load gem ").append(pluginGemName).append("\"\n")
+                   .append("end\n");
+            // Require any file directly in the pluginLibdir directory (e.g. /var/tmp/bundles/ruby/foo/1.0/gems/*.rb).
+            // Although it is likely that any Killbill plugin will be distributed as a gem, it is still useful to
+            // be able to load individual scripts for prototyping/testing/...
+            builder.append("Dir.glob(ENV[\"GEM_HOME\"] + \"/*.rb\").each {|x| require x rescue warn \"WARN: unable to load #{x}\"}\n");
+            cachedRequireLine = builder.toString();
+        }
+        return cachedRequireLine;
     }
 
     protected Ruby getRuntime() {

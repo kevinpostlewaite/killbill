@@ -63,9 +63,11 @@ public class DefaultNonEntityDao implements NonEntityDao {
             case ACCOUNT:
                 return nonEntitySqlDao.getAccountRecordIdFromAccount(objectId.toString());
 
+            /*
+            Never used as there is no ObjectType -> TableName.ACCOUNT_HISTORY
             case ACCOUNT_HISTORY:
                 return nonEntitySqlDao.getAccountRecordIdFromAccountHistory(objectId.toString());
-
+            */
             default:
                 return nonEntitySqlDao.getAccountRecordIdFromObjectOtherThanAccount(objectId.toString(), tableName.getTableName());
         }

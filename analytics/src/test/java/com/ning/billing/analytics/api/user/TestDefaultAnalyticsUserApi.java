@@ -108,7 +108,7 @@ public class TestDefaultAnalyticsUserApi extends AnalyticsTestSuiteWithEmbeddedD
                                                        Mockito.mock(EntitlementInternalApi.class),
                                                        Mockito.mock(PaymentInternalApi.class),
                                                        Mockito.mock(TagInternalApi.class),
-                                                       new InternalCallContextFactory(dbi, clock, nonEntityDao, new CacheControllerDispatcher()));
+                                                       new InternalCallContextFactory(clock, nonEntityDao, new CacheControllerDispatcher()));
     }
 
     @Test(groups = "mysql")

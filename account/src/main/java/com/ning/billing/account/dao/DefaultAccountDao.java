@@ -35,6 +35,7 @@ import com.ning.billing.util.callcontext.InternalCallContext;
 import com.ning.billing.util.callcontext.InternalCallContextFactory;
 import com.ning.billing.util.callcontext.InternalTenantContext;
 import com.ning.billing.util.clock.Clock;
+import com.ning.billing.util.dao.NonEntityDao;
 import com.ning.billing.util.entity.EntityPersistenceException;
 import com.ning.billing.util.entity.dao.EntityDaoBase;
 import com.ning.billing.util.entity.dao.EntitySqlDao;
@@ -56,8 +57,9 @@ public class DefaultAccountDao extends EntityDaoBase<AccountModelDao, Account, A
     private final InternalCallContextFactory internalCallContextFactory;
 
     @Inject
-    public DefaultAccountDao(final IDBI dbi, final InternalBus eventBus, final Clock clock, final CacheControllerDispatcher cacheControllerDispatcher, final InternalCallContextFactory internalCallContextFactory) {
-        super(new EntitySqlDaoTransactionalJdbiWrapper(dbi, clock, cacheControllerDispatcher), AccountSqlDao.class);
+    public DefaultAccountDao(final IDBI dbi, final InternalBus eventBus, final Clock clock, final CacheControllerDispatcher cacheControllerDispatcher,
+                             final InternalCallContextFactory internalCallContextFactory, final NonEntityDao nonEntityDao) {
+        super(new EntitySqlDaoTransactionalJdbiWrapper(dbi, clock, cacheControllerDispatcher, nonEntityDao), AccountSqlDao.class);
         this.eventBus = eventBus;
         this.internalCallContextFactory = internalCallContextFactory;
     }

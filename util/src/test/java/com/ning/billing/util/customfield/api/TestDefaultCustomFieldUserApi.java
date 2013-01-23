@@ -50,8 +50,8 @@ public class TestDefaultCustomFieldUserApi extends UtilTestSuiteWithEmbeddedDB {
     @BeforeMethod(groups = "slow")
     public void setUp() throws Exception {
         final NonEntityDao nonEntityDao = new DefaultNonEntityDao(getDBI());
-        final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(getDBI(), new ClockMock(), nonEntityDao, controllerDispatcher);
-        final CustomFieldDao customFieldDao = new DefaultCustomFieldDao(getDBI(), clock, controllerDispatcher);
+        final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(new ClockMock(), nonEntityDao, controllerDispatcher);
+        final CustomFieldDao customFieldDao = new DefaultCustomFieldDao(getDBI(), clock, controllerDispatcher, nonEntityDao);
         customFieldUserApi = new DefaultCustomFieldUserApi(internalCallContextFactory, customFieldDao);
     }
 

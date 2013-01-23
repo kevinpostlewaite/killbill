@@ -86,6 +86,7 @@ public class TestNextBillingDateNotifier extends InvoiceTestSuiteWithEmbeddedDB 
     private InternalCallContextFactory internalCallContextFactory;
     private EntitySqlDaoTransactionalJdbiWrapper entitySqlDaoTransactionalJdbiWrapper;
     private CacheControllerDispatcher controllerDispatcher;
+    private NonEntityDao nonEntityDao;
 
     private static final class InvoiceListenerMock extends InvoiceListener {
 
@@ -156,9 +157,11 @@ public class TestNextBillingDateNotifier extends InvoiceTestSuiteWithEmbeddedDB 
 
         clock = g.getInstance(Clock.class);
         final IDBI dbi = g.getInstance(IDBI.class);
+
+        nonEntityDao = g.getInstance(NonEntityDao.class);
         controllerDispatcher = g.getInstance(CacheControllerDispatcher.class);
 
-        entitySqlDaoTransactionalJdbiWrapper = new EntitySqlDaoTransactionalJdbiWrapper(dbi, clock, controllerDispatcher);
+        entitySqlDaoTransactionalJdbiWrapper = new EntitySqlDaoTransactionalJdbiWrapper(dbi, clock, controllerDispatcher, nonEntityDao);
 
         eventBus = g.getInstance(InternalBus.class);
         notificationQueueService = g.getInstance(NotificationQueueService.class);

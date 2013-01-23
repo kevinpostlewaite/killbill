@@ -28,8 +28,5 @@ public class NonEntityDaoModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(NonEntityDao.class).to(DefaultNonEntityDao.class).asEagerSingleton();
-
-        // TODO Should that one really be bound here; maybe we need one util module-- unclear
-        bind(InternalCallContextFactory.class).asEagerSingleton();
     }
 }

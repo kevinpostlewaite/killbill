@@ -21,13 +21,13 @@ import org.skife.jdbi.v2.sqlobject.SqlQuery;
 import org.skife.jdbi.v2.sqlobject.customizers.Define;
 import org.skife.jdbi.v2.sqlobject.mixins.CloseMe;
 import org.skife.jdbi.v2.sqlobject.mixins.Transactional;
-import org.skife.jdbi.v2.sqlobject.stringtemplate.ExternalizedSqlViaStringTemplate3;
+import org.skife.jdbi.v2.sqlobject.stringtemplate.UseStringTemplate3StatementLocator;
 
-@ExternalizedSqlViaStringTemplate3()
+@UseStringTemplate3StatementLocator
 public interface NonEntitySqlDao extends Transactional<NonEntitySqlDao>, CloseMe {
 
-   @SqlQuery
-   public Long getRecordIdFromObject(@Bind("id") String id, @Define("tableName") final String tableName);
+    @SqlQuery
+    public Long getRecordIdFromObject(@Bind("id") String id, @Define("tableName") final String tableName);
 
     @SqlQuery
     public Long getAccountRecordIdFromAccount(@Bind("id") String id);
@@ -43,4 +43,10 @@ public interface NonEntitySqlDao extends Transactional<NonEntitySqlDao>, CloseMe
 
     @SqlQuery
     public Long getTenantRecordIdFromObjectOtherThanTenant(@Bind("id") String id, @Define("tableName") final String tableName);
+
+    @SqlQuery
+    public Long getLastHistoryRecordId(@Bind("targetRecordId") Long targetRecordId, @Define("tableName") final String tableName);
+
+    @SqlQuery
+    public Long getHistoryTargetRecordId(@Bind("recordId") Long recordId, @Define("tableName") final String tableName);
 }

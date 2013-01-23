@@ -37,6 +37,7 @@ import com.ning.billing.util.UtilTestSuiteWithEmbeddedDB;
 import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.clock.Clock;
 import com.ning.billing.util.clock.ClockMock;
+import com.ning.billing.util.dao.NonEntityDao;
 import com.ning.billing.util.entity.dao.EntitySqlDao;
 import com.ning.billing.util.entity.dao.EntitySqlDaoTransactionWrapper;
 import com.ning.billing.util.entity.dao.EntitySqlDaoTransactionalJdbiWrapper;
@@ -73,10 +74,14 @@ public class TestNotificationQueue extends UtilTestSuiteWithEmbeddedDB {
     private Clock clock;
 
     @Inject
-    NotificationQueueService queueService;
+    private NotificationQueueService queueService;
 
     @Inject
-    CacheControllerDispatcher controllerDispatcher;
+    private CacheControllerDispatcher controllerDispatcher;
+
+    @Inject
+    private NonEntityDao nonEntityDao;
+
 
     private int eventsReceived;
 
@@ -111,7 +116,7 @@ public class TestNotificationQueue extends UtilTestSuiteWithEmbeddedDB {
     public void setup() throws Exception {
         final String testDdl = IOUtils.toString(NotificationSqlDao.class.getResourceAsStream("/com/ning/billing/util/ddl_test.sql"));
         helper.initDb(testDdl);
-        entitySqlDaoTransactionalJdbiWrapper = new EntitySqlDaoTransactionalJdbiWrapper(dbi, clock, controllerDispatcher);
+        entitySqlDaoTransactionalJdbiWrapper = new EntitySqlDaoTransactionalJdbiWrapper(dbi, clock, controllerDispatcher, nonEntityDao);
     }
 
     @BeforeTest(groups = "slow")

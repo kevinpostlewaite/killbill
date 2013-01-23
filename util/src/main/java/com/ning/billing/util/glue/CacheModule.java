@@ -18,7 +18,9 @@ package com.ning.billing.util.glue;
 
 import java.util.UUID;
 
+import org.skife.config.ConfigSource;
 import org.skife.config.ConfigurationObjectFactory;
+import org.skife.config.SimplePropertyConfigSource;
 
 import com.ning.billing.util.cache.AccountRecordIdCacheLoader;
 import com.ning.billing.util.cache.Cachable;
@@ -47,7 +49,8 @@ public class CacheModule extends AbstractModule {
     public static final Named TENANT_RECORD_ID_CACHE_NAMED = Names.named(Cachable.TENANT_RECORD_ID_CACHE_NAME);
 
     protected void installConfig() {
-        final CacheConfig config = new ConfigurationObjectFactory(System.getProperties()).build(CacheConfig.class);
+        final ConfigSource configSource = new SimplePropertyConfigSource(System.getProperties());
+        final CacheConfig config = new ConfigurationObjectFactory(configSource).build(CacheConfig.class);
         bind(CacheConfig.class).toInstance(config);
     }
 

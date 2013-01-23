@@ -39,6 +39,7 @@ import com.ning.billing.payment.dao.RefundModelDao.RefundStatus;
 import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.clock.Clock;
 import com.ning.billing.util.clock.DefaultClock;
+import com.ning.billing.util.dao.DefaultNonEntityDao;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -59,7 +60,7 @@ public class TestPaymentDao extends PaymentTestSuiteWithEmbeddedDB {
         clock = new DefaultClock();
         controllerDispatcher = new CacheControllerDispatcher();
         setupDb();
-        paymentDao = new DefaultPaymentDao(dbi, clock, controllerDispatcher);
+        paymentDao = new DefaultPaymentDao(dbi, clock, controllerDispatcher, new DefaultNonEntityDao(dbi));
     }
 
     private void setupDb() {

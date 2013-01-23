@@ -44,6 +44,7 @@ import com.ning.billing.util.callcontext.InternalCallContext;
 import com.ning.billing.util.clock.Clock;
 import com.ning.billing.util.clock.ClockMock;
 import com.ning.billing.util.config.InvoiceConfig;
+import com.ning.billing.util.dao.DefaultNonEntityDao;
 import com.ning.billing.util.entity.EntityPersistenceException;
 import com.ning.billing.util.svcsapi.bus.InternalBus;
 
@@ -103,7 +104,8 @@ public class InvoiceDaoTestBase extends InvoicingTestBase {
 
         final NextBillingDatePoster nextBillingDatePoster = new MockNextBillingDatePoster();
         controllerDispatcher = new CacheControllerDispatcher();
-        invoiceDao = new DefaultInvoiceDao(dbi, nextBillingDatePoster, bus, clock, controllerDispatcher);
+
+        invoiceDao = new DefaultInvoiceDao(dbi, nextBillingDatePoster, bus, clock, controllerDispatcher, new DefaultNonEntityDao(dbi));
         invoiceDao.test(internalCallContext);
 
         invoiceItemSqlDao = dbi.onDemand(InvoiceItemSqlDao.class);

@@ -99,7 +99,7 @@ public class TestOverdueCheckNotifier extends OverdueTestSuiteWithEmbeddedDB {
         UUID latestSubscriptionId = null;
 
         public OverdueListenerMock() {
-            super(null, new InternalCallContextFactory(getDBI(), new ClockMock(), new DefaultNonEntityDao(getDBI()), new CacheControllerDispatcher()));
+            super(null, new InternalCallContextFactory(new ClockMock(), new DefaultNonEntityDao(getDBI()), new CacheControllerDispatcher()));
         }
 
         @Override

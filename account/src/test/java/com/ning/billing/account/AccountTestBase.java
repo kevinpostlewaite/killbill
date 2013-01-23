@@ -81,13 +81,13 @@ public abstract class AccountTestBase extends AccountTestSuiteWithEmbeddedDB {
 
             controllerDispatcher = new CacheControllerDispatcher();
             nonEntityDao = new DefaultNonEntityDao(dbi);
-            final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(dbi, clock, nonEntityDao, controllerDispatcher);
-            accountDao = new DefaultAccountDao(dbi, bus, clock, controllerDispatcher, internalCallContextFactory);
+            final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(clock, nonEntityDao, controllerDispatcher);
+            accountDao = new DefaultAccountDao(dbi, bus, clock, controllerDispatcher, internalCallContextFactory, nonEntityDao);
             auditDao = new DefaultAuditDao(dbi);
-            customFieldDao = new DefaultCustomFieldDao(dbi, clock, controllerDispatcher);
-            tagDefinitionDao = new DefaultTagDefinitionDao(dbi, tagEventBuilder, bus, clock, controllerDispatcher);
+            customFieldDao = new DefaultCustomFieldDao(dbi, clock, controllerDispatcher, nonEntityDao);
+            tagDefinitionDao = new DefaultTagDefinitionDao(dbi, tagEventBuilder, bus, clock, controllerDispatcher, nonEntityDao);
 
-            tagDao = new DefaultTagDao(dbi, tagEventBuilder, bus, clock, controllerDispatcher);
+            tagDao = new DefaultTagDao(dbi, tagEventBuilder, bus, clock, controllerDispatcher, nonEntityDao);
 
             // Health check test to make sure MySQL is setup properly
             accountDao.test(internalCallContext);

@@ -32,6 +32,8 @@ import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.customfield.dao.CustomFieldDao;
 import com.ning.billing.util.customfield.dao.CustomFieldModelDao;
 import com.ning.billing.util.customfield.dao.DefaultCustomFieldDao;
+import com.ning.billing.util.dao.DefaultNonEntityDao;
+import com.ning.billing.util.dao.NonEntityDao;
 
 import static org.testng.Assert.fail;
 
@@ -42,12 +44,12 @@ public class TestFieldStore extends UtilTestSuiteWithEmbeddedDB {
 
     private CacheControllerDispatcher controllerDispatcher = new CacheControllerDispatcher();
 
-
     @BeforeClass(groups = "slow")
     protected void setup() throws IOException {
         try {
             final IDBI dbi = getDBI();
-            customFieldDao = new DefaultCustomFieldDao(dbi, clock, controllerDispatcher);
+            final NonEntityDao nonEntityDao = new DefaultNonEntityDao(dbi);
+            customFieldDao = new DefaultCustomFieldDao(dbi, clock, controllerDispatcher, nonEntityDao);
         } catch (Throwable t) {
             log.error("Setup failed", t);
             fail(t.toString());

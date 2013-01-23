@@ -60,16 +60,6 @@ public interface EntitySqlDao<M extends EntityModelDao<E>, E extends Entity> ext
     public Long getRecordId(@Bind("id") final String id,
                             @BindBean final InternalTenantContext context);
 
-    // Given entity recordId find the history recordId (targetRecordId for history table = entity recordId)
-    @SqlQuery
-    public Long getHistoryRecordId(@Bind("targetRecordId") final Long targetRecordId,
-                                   @BindBean final InternalTenantContext context);
-
-    // Given history recordId find the entity recordId (targetRecordId for history table = entity recordId)
-    @SqlQuery
-    public Long getHistoryTargetRecordId(@Bind("recordId") final Long recordId,
-                                         @BindBean final InternalTenantContext context);
-
     @SqlQuery
     public List<M> get(@BindBean final InternalTenantContext context);
 

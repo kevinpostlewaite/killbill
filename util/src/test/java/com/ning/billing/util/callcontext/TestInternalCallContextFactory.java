@@ -42,7 +42,7 @@ public class TestInternalCallContextFactory extends UtilTestSuiteWithEmbeddedDB 
     public void setUp() throws Exception {
         cacheControllerDispatcher =  new CacheControllerDispatcher();
         nonEntityDao = new DefaultNonEntityDao(getDBI());
-        internalCallContextFactory = new InternalCallContextFactory(getDBI(), new ClockMock(), nonEntityDao, cacheControllerDispatcher);
+        internalCallContextFactory = new InternalCallContextFactory(new ClockMock(), nonEntityDao, cacheControllerDispatcher);
     }
 
     @Test(groups = "slow")

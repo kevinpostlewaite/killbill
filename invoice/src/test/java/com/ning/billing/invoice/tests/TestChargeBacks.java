@@ -89,8 +89,8 @@ public class TestChargeBacks extends InvoiceTestSuiteWithEmbeddedDB {
         invoiceItemSqlDao = dbi.onDemand(InvoiceItemSqlDao.class);
         invoiceItemSqlDao.test(internalCallContext);
         final NextBillingDatePoster nextBillingDatePoster = new MockNextBillingDatePoster();
-        internalCallContextFactory = new InternalCallContextFactory(dbi, clock, nonEntityDao, controllerDispatcher);
-        final InvoiceDao invoiceDao = new DefaultInvoiceDao(dbi, nextBillingDatePoster, Mockito.mock(InternalBus.class), clock, controllerDispatcher);
+        internalCallContextFactory = new InternalCallContextFactory(clock, nonEntityDao, controllerDispatcher);
+        final InvoiceDao invoiceDao = new DefaultInvoiceDao(dbi, nextBillingDatePoster, Mockito.mock(InternalBus.class), clock, controllerDispatcher, nonEntityDao);
         invoicePaymentApi = new DefaultInvoicePaymentApi(invoiceDao, internalCallContextFactory);
         invoiceApi = new DefaultInvoiceInternalApi(invoiceDao);
     }

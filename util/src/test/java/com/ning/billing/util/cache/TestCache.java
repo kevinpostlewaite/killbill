@@ -21,7 +21,6 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
@@ -29,12 +28,8 @@ import com.ning.billing.ObjectType;
 import com.ning.billing.mock.glue.MockDbHelperModule;
 import com.ning.billing.util.UtilTestSuiteWithEmbeddedDB;
 import com.ning.billing.util.cache.Cachable.CacheType;
-import com.ning.billing.util.dao.TableName;
-import com.ning.billing.util.entity.Entity;
-import com.ning.billing.util.entity.EntityBase;
-import com.ning.billing.util.entity.dao.EntityModelDao;
+import com.ning.billing.util.dao.NonEntityDao;
 import com.ning.billing.util.entity.dao.EntitySqlDao;
-import com.ning.billing.util.entity.dao.EntitySqlDaoStringTemplate;
 import com.ning.billing.util.entity.dao.EntitySqlDaoTransactionWrapper;
 import com.ning.billing.util.entity.dao.EntitySqlDaoTransactionalJdbiWrapper;
 import com.ning.billing.util.entity.dao.EntitySqlDaoWrapperFactory;
@@ -49,6 +44,9 @@ public class TestCache extends UtilTestSuiteWithEmbeddedDB {
 
     @Inject
     private CacheControllerDispatcher controlCacheDispatcher;
+
+    @Inject
+    private NonEntityDao nonEntityDao;
 
     private  EntitySqlDaoTransactionalJdbiWrapper transactionalSqlDao;
 
@@ -89,7 +87,7 @@ public class TestCache extends UtilTestSuiteWithEmbeddedDB {
     @Test(groups = "slow")
     public void testCacheRecordId() throws Exception {
 
-        this.transactionalSqlDao = new EntitySqlDaoTransactionalJdbiWrapper(getDBI(), clock, controlCacheDispatcher);
+        this.transactionalSqlDao = new EntitySqlDaoTransactionalJdbiWrapper(getDBI(), clock, controlCacheDispatcher, nonEntityDao);
         final TagModelDao tag = new TagModelDao(clock.getUTCNow(), UUID.randomUUID(), UUID.randomUUID(), ObjectType.TAG);
 
         // Verify we start with nothing in the cache

@@ -65,7 +65,7 @@ public class TestTimelineAggregator extends MeterTestSuiteWithEmbeddedDB {
     private static final SampleCoder sampleCoder = new DefaultSampleCoder();
 
     private final NonEntityDao nonEntityDao = Mockito.mock(NonEntityDao.class);
-    private final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(getDBI(), new ClockMock(), nonEntityDao, new CacheControllerDispatcher());
+    private final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(new ClockMock(), nonEntityDao, new CacheControllerDispatcher());
 
     private TimelineDao timelineDao;
     private TimelineAggregator aggregator;

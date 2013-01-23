@@ -29,64 +29,95 @@ import com.ning.billing.util.cache.CacheController;
 public class DefaultNonEntityDao implements NonEntityDao {
 
     private final NonEntitySqlDao nonEntitySqlDao;
+    private final WithCaching containedCall;
 
 
     @Inject
     public DefaultNonEntityDao(final IDBI dbi) {
         this.nonEntitySqlDao = dbi.onDemand(NonEntitySqlDao.class);
+        this.containedCall = new WithCaching();
     }
+
 
     public Long retrieveRecordIdFromObject(final UUID objectId, final ObjectType objectType, @Nullable final CacheController<Object, Object> cache) {
 
-        final Long cachedResult = (cache != null) ? (Long) cache.get(objectId.toString(), objectType) : null;
-        if (cachedResult != null) {
-            return cachedResult;
-        }
+        return containedCall.withCaching(new OperationRetrieval<Long>() {
+            @Override
+            public Long doRetrieve(final UUID objectId, final ObjectType objectType) {
+                final TableName tableName = TableName.fromObjectType(objectType);
+                return nonEntitySqlDao.getRecordIdFromObject(objectId.toString(), tableName.getTableName());
+            }
+        }, objectId, objectType, cache);
 
-        final TableName tableName = TableName.fromObjectType(objectType);
-        return nonEntitySqlDao.getRecordIdFromObject(objectId.toString(), tableName.getTableName());
     }
 
     public Long retrieveAccountRecordIdFromObject(final UUID objectId, final ObjectType objectType, @Nullable final CacheController<Object, Object> cache) {
 
-        final Long cachedResult = (cache != null) ? (Long) cache.get(objectId.toString(), objectType) : null;
-        if (cachedResult != null) {
-            return cachedResult;
-        }
 
-        final TableName tableName = TableName.fromObjectType(objectType);
-        switch (tableName) {
-            case TAG_DEFINITIONS:
-            case TAG_DEFINITION_HISTORY:
-                return null;
+        return containedCall.withCaching(new OperationRetrieval<Long>() {
+            @Override
+            public Long doRetrieve(final UUID objectId, final ObjectType objectType) {
+                final TableName tableName = TableName.fromObjectType(objectType);
+                switch (tableName) {
+                    case TENANT:
+                    case TAG_DEFINITIONS:
+                    case TAG_DEFINITION_HISTORY:
+                        return null;
 
-            case ACCOUNT:
-                return nonEntitySqlDao.getAccountRecordIdFromAccount(objectId.toString());
+                    case ACCOUNT:
+                        return nonEntitySqlDao.getAccountRecordIdFromAccount(objectId.toString());
 
-            /*
-            Never used as there is no ObjectType -> TableName.ACCOUNT_HISTORY
-            case ACCOUNT_HISTORY:
-                return nonEntitySqlDao.getAccountRecordIdFromAccountHistory(objectId.toString());
-            */
-            default:
-                return nonEntitySqlDao.getAccountRecordIdFromObjectOtherThanAccount(objectId.toString(), tableName.getTableName());
-        }
+                    default:
+                        return nonEntitySqlDao.getAccountRecordIdFromObjectOtherThanAccount(objectId.toString(), tableName.getTableName());
+                }
+            }
+        }, objectId, objectType, cache);
     }
 
 
     public Long retrieveTenantRecordIdFromObject(final UUID objectId, final ObjectType objectType, @Nullable final CacheController<Object, Object> cache) {
 
-        final Long cachedResult = (cache != null) ? (Long) cache.get(objectId.toString(), objectType) : null;
-        if (cachedResult != null) {
-            return cachedResult;
-        }
-        final TableName tableName = TableName.fromObjectType(objectType);
-        switch (tableName) {
-            case TENANT:
-                return nonEntitySqlDao.getTenantRecordIdFromTenant(objectId.toString());
 
-            default:
-                return nonEntitySqlDao.getTenantRecordIdFromObjectOtherThanTenant(objectId.toString(), tableName.getTableName());
+        return containedCall.withCaching(new OperationRetrieval<Long>() {
+            @Override
+            public Long doRetrieve(final UUID objectId, final ObjectType objectType) {
+                final TableName tableName = TableName.fromObjectType(objectType);
+                switch (tableName) {
+                    case TENANT:
+                        return nonEntitySqlDao.getTenantRecordIdFromTenant(objectId.toString());
+
+                    default:
+                        return nonEntitySqlDao.getTenantRecordIdFromObjectOtherThanTenant(objectId.toString(), tableName.getTableName());
+                }
+
+            }
+        }, objectId, objectType, cache);
+    }
+
+    @Override
+    public Long retrieveLastHistoryRecordIdFromTransaction(final Long targetRecordId, final TableName tableName, final NonEntitySqlDao transactional) {
+        // There is no caching here because the value returned changes as we add more history records, and so we would need some cache invalidation
+        return transactional.getLastHistoryRecordId(targetRecordId, tableName.getTableName());
+    }
+
+    @Override
+    public Long retrieveHistoryTargetRecordId(final Long recordId, final TableName tableName) {
+        return nonEntitySqlDao.getHistoryTargetRecordId(recordId, tableName.getTableName());
+    }
+
+
+    private interface OperationRetrieval<T> {
+        public T doRetrieve(final UUID objectId, final ObjectType objectType);
+    }
+
+
+    private class WithCaching {
+        private Long withCaching(final OperationRetrieval<Long> op, final UUID objectId, final ObjectType objectType, @Nullable final CacheController<Object, Object> cache) {
+            if (cache != null) {
+                final Long cachedResult = (Long) cache.get(objectId.toString(), objectType);
+                return cachedResult;
+            }
+            return op.doRetrieve(objectId, objectType);
         }
     }
 }

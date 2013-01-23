@@ -16,25 +16,18 @@
 
 package com.ning.billing.util.callcontext;
 
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.joda.time.DateTime;
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.IDBI;
-import org.skife.jdbi.v2.tweak.HandleCallback;
 
 import com.ning.billing.ObjectType;
 import com.ning.billing.util.cache.Cachable.CacheType;
-import com.ning.billing.util.cache.CacheController;
 import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.clock.Clock;
 import com.ning.billing.util.dao.NonEntityDao;
-import com.ning.billing.util.dao.TableName;
 
 import com.google.common.base.Objects;
 
@@ -42,14 +35,12 @@ public class InternalCallContextFactory {
 
     public static final long INTERNAL_TENANT_RECORD_ID = 0L;
 
-    private final IDBI dbi;
     private final Clock clock;
     private final NonEntityDao nonEntityDao;
     private final CacheControllerDispatcher cacheControllerDispatcher;
 
     @Inject
-    public InternalCallContextFactory(final IDBI dbi, final Clock clock, final NonEntityDao nonEntityDao, final CacheControllerDispatcher cacheControllerDispatcher) {
-        this.dbi = dbi;
+    public InternalCallContextFactory(final Clock clock, final NonEntityDao nonEntityDao, final CacheControllerDispatcher cacheControllerDispatcher) {
         this.clock = clock;
         this.nonEntityDao = nonEntityDao;
         this.cacheControllerDispatcher = cacheControllerDispatcher;

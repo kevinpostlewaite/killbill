@@ -47,6 +47,8 @@ import com.ning.billing.util.callcontext.InternalCallContext;
 import com.ning.billing.util.clock.Clock;
 import com.ning.billing.util.dao.EntityAudit;
 import com.ning.billing.util.dao.EntityHistoryModelDao;
+import com.ning.billing.util.dao.NonEntityDao;
+import com.ning.billing.util.dao.NonEntitySqlDao;
 import com.ning.billing.util.dao.TableName;
 import com.ning.billing.util.entity.Entity;
 import com.ning.billing.util.tag.dao.TagSqlDao;
@@ -71,12 +73,14 @@ public class EntitySqlDaoWrapperInvocationHandler<S extends EntitySqlDao<M, E>, 
 
     private final CacheControllerDispatcher cacheControllerDispatcher;
     private final Clock clock;
+    private final NonEntityDao nonEntityDao;
 
-    public EntitySqlDaoWrapperInvocationHandler(final Class<S> sqlDaoClass, final S sqlDao, final Clock clock , final CacheControllerDispatcher cacheControllerDispatcher) {
+    public EntitySqlDaoWrapperInvocationHandler(final Class<S> sqlDaoClass, final S sqlDao, final Clock clock, final CacheControllerDispatcher cacheControllerDispatcher, final NonEntityDao nonEntityDao) {
         this.sqlDaoClass = sqlDaoClass;
         this.sqlDao = sqlDao;
         this.clock = clock;
         this.cacheControllerDispatcher = cacheControllerDispatcher;
+        this.nonEntityDao = nonEntityDao;
     }
 
     @Override
@@ -336,8 +340,11 @@ public class EntitySqlDaoWrapperInvocationHandler<S extends EntitySqlDao<M, E>, 
 
     private Long insertHistory(final Long entityRecordId, final M entityModelDao, final ChangeType changeType, final InternalCallContext context) {
         final EntityHistoryModelDao<M, E> history = new EntityHistoryModelDao<M, E>(entityModelDao, entityRecordId, changeType, clock.getUTCNow());
+
         sqlDao.addHistoryFromTransaction(history, context);
-        return sqlDao.getHistoryRecordId(entityRecordId, context);
+
+        final NonEntitySqlDao transactional = sqlDao.become(NonEntitySqlDao.class);
+        return nonEntityDao.retrieveLastHistoryRecordIdFromTransaction(entityRecordId, entityModelDao.getHistoryTableName(), transactional);
     }
 
     private void insertAudits(final TableName tableName, final Long historyRecordId, final ChangeType changeType, final InternalCallContext context) {

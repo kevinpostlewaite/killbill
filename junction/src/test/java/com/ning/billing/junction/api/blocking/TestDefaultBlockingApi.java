@@ -34,6 +34,7 @@ import com.ning.billing.junction.dao.BlockingStateDao;
 import com.ning.billing.junction.dao.DefaultBlockingStateDao;
 import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.clock.ClockMock;
+import com.ning.billing.util.dao.DefaultNonEntityDao;
 import com.ning.billing.util.svcapi.junction.DefaultBlockingState;
 
 public class TestDefaultBlockingApi extends JunctionTestSuiteWithEmbeddedDB {
@@ -47,7 +48,7 @@ public class TestDefaultBlockingApi extends JunctionTestSuiteWithEmbeddedDB {
 
     @BeforeMethod(groups = "slow")
     public void setUp() throws Exception {
-        final BlockingStateDao blockingStateDao = new DefaultBlockingStateDao(getDBI(), clock, controllerDispatcher);
+        final BlockingStateDao blockingStateDao = new DefaultBlockingStateDao(getDBI(), clock, controllerDispatcher, new DefaultNonEntityDao(getDBI()));
         blockingApi = new DefaultInternalBlockingApi(blockingStateDao, clock);
     }
 

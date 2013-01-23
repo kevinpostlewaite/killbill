@@ -48,3 +48,20 @@ where id = :id
 ;
 >>
 
+
+getLastHistoryRecordId(tableName) ::= <<
+select
+  max(record_id)
+from <tableName>
+where target_record_id = :targetRecordId
+;
+>>
+
+getHistoryTargetRecordId(tableName) ::= <<
+select
+  target_record_id
+from <tableName>
+where record_id = :recordId
+;
+>>
+

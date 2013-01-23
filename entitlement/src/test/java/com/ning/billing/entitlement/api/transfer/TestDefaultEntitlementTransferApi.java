@@ -68,7 +68,7 @@ public class TestDefaultEntitlementTransferApi extends EntitlementTestSuite {
         final CatalogService catalogService = new MockCatalogService(new MockCatalog());
         final SubscriptionApiService apiService =  Mockito.mock(SubscriptionApiService.class);
         final EntitlementTimelineApi timelineApi = Mockito.mock(EntitlementTimelineApi.class);
-        final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(Mockito.mock(IDBI.class), clock, nonEntityDao, new CacheControllerDispatcher());
+        final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(clock, nonEntityDao, new CacheControllerDispatcher());
         transferApi = new DefaultEntitlementTransferApi(clock, dao, timelineApi, catalogService, apiService, internalCallContextFactory);
     }
 

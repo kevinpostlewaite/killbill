@@ -84,8 +84,8 @@ public class TestDefaultInvoicePaymentApi extends InvoiceTestSuiteWithEmbeddedDB
 
         final NonEntityDao nonEntityDao = new DefaultNonEntityDao(dbi);
         final NextBillingDatePoster nextBillingDatePoster = new MockNextBillingDatePoster();
-        internalCallContextFactory = new InternalCallContextFactory(dbi, clock, nonEntityDao, controllerDispatcher);
-        final InvoiceDao invoiceDao = new DefaultInvoiceDao(dbi, nextBillingDatePoster, Mockito.mock(InternalBus.class), clock, controllerDispatcher);
+        internalCallContextFactory = new InternalCallContextFactory(clock, nonEntityDao, controllerDispatcher);
+        final InvoiceDao invoiceDao = new DefaultInvoiceDao(dbi, nextBillingDatePoster, Mockito.mock(InternalBus.class), clock, controllerDispatcher, nonEntityDao);
         invoicePaymentApi = new DefaultInvoicePaymentApi(invoiceDao, internalCallContextFactory);
         invoiceInternalApi = new DefaultInvoiceInternalApi(invoiceDao);
     }

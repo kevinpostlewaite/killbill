@@ -21,8 +21,10 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.ning.billing.ObjectType;
+import com.ning.billing.dao.MockNonEntityDao;
 import com.ning.billing.util.cache.CacheController;
 import com.ning.billing.util.dao.NonEntityDao;
+import com.ning.billing.util.dao.TableName;
 
 import com.google.inject.AbstractModule;
 
@@ -30,23 +32,6 @@ public class MockNonEntityDaoModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        final NonEntityDao instance = new NonEntityDao() {
-            @Override
-            public Long retrieveRecordIdFromObject(final UUID objectId, final ObjectType objectType, @Nullable final CacheController<Object, Object> cache) {
-                return null;
-            }
-
-            @Override
-            public Long retrieveAccountRecordIdFromObject(final UUID objectId, final ObjectType objectType, @Nullable final CacheController<Object, Object> cache) {
-                return null;
-            }
-
-            @Override
-            public Long retrieveTenantRecordIdFromObject(final UUID objectId, final ObjectType objectType, @Nullable final CacheController<Object, Object> cache) {
-                return null;
-            }
-        };
-        bind(NonEntityDao.class).toInstance(instance);
-
+        bind(NonEntityDao.class).to(MockNonEntityDao.class);
     }
 }

@@ -67,7 +67,7 @@ public class TestFileBackedBuffer extends MeterTestSuite {
     private static final SampleCoder sampleCoder = new DefaultSampleCoder();
 
     private final NonEntityDao nonEntityDao = Mockito.mock(NonEntityDao.class);
-    private final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(Mockito.mock(DBI.class), new ClockMock(), nonEntityDao, new CacheControllerDispatcher());
+    private final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(new ClockMock(), nonEntityDao, new CacheControllerDispatcher());
     private final TimelineDao dao = new MockTimelineDao();
     private TimelineEventHandler timelineEventHandler;
 

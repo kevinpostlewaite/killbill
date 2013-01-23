@@ -112,6 +112,16 @@ public class TestNonEntityDao extends UtilTestSuiteWithEmbeddedDB {
         Assert.assertEquals(resultTenantRecordId, tenantRecordId);
     }
 
+    /*
+    @Test(groups = "slow")
+    public void testRetrieveTenantRecordIdFromTenantObject() {
+
+        insertTenant();
+
+        final Long resultTenantRecordId = nonEntityDao.retrieveLastHistoryRecordIdFromTransaction();
+        Assert.assertEquals(resultTenantRecordId, tenantRecordId);
+    }
+*/
 
     private void insertAccount() {
         getDBI().withHandle(new HandleCallback<Void>() {
@@ -119,6 +129,18 @@ public class TestNonEntityDao extends UtilTestSuiteWithEmbeddedDB {
             public Void withHandle(final Handle handle) throws Exception {
                 // Note: we always create an accounts table, see MysqlTestingHelper
                 handle.execute("insert into accounts (record_id, id, email, name, first_name_length, is_notified_for_invoices, created_date, created_by, updated_date, updated_by, tenant_record_id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                               accountRecordId, accountId.toString(), "zozo@tt.com", "zozo", 4, false, new Date(), "i", new Date(), "j", tenantRecordId);
+                return null;
+            }
+        });
+    }
+
+    private void insertHistoryAccount() {
+        getDBI().withHandle(new HandleCallback<Void>() {
+            @Override
+            public Void withHandle(final Handle handle) throws Exception {
+                // Note: we always create an accounts table, see MysqlTestingHelper
+                handle.execute("insert into account_history (record_id, id, email, name, first_name_length, is_notified_for_invoices, created_date, created_by, updated_date, updated_by, tenant_record_id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                accountRecordId, accountId.toString(), "zozo@tt.com", "zozo", 4, false, new Date(), "i", new Date(), "j", tenantRecordId);
                 return null;
             }

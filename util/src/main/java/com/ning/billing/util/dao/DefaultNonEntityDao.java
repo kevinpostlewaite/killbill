@@ -111,6 +111,7 @@ public class DefaultNonEntityDao implements NonEntityDao {
     }
 
 
+    // 'cache' will be null for the CacheLoader classes -- or if cache is not configured.
     private class WithCaching {
         private Long withCaching(final OperationRetrieval<Long> op, final UUID objectId, final ObjectType objectType, @Nullable final CacheController<Object, Object> cache) {
             if (cache != null) {

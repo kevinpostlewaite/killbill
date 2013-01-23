@@ -36,5 +36,6 @@ public interface EntityModelDao<E extends Entity> extends Entity {
      */
     public TableName getTableName();
 
+
     public TableName getHistoryTableName();
 }

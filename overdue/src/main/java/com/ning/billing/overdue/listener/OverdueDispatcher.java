@@ -50,30 +50,28 @@ public class OverdueDispatcher {
     public void processOverdueForAccount(final UUID accountId, final InternalCallContext context) {
         final List<SubscriptionBundle> bundles = entitlementApi.getBundlesForAccount(accountId, context);
         for (final SubscriptionBundle bundle : bundles) {
-            processOverdue(Type.SUBSCRIPTION_BUNDLE, bundle, context);
+            processOverdue(Type.SUBSCRIPTION_BUNDLE, bundle.getId(), context);
         }
     }
 
-    public void processOverdueForBundle(final UUID bundleId, final InternalCallContext context) {
-        try {
-            final SubscriptionBundle bundle = entitlementApi.getBundleFromId(bundleId, context);
-            processOverdue(Type.SUBSCRIPTION_BUNDLE, bundle, context);
-        } catch (EntitlementUserApiException e) {
-            log.error("Error processing Overdue for bundle with id: " + bundleId.toString(), e);
-        }
-    }
-
-    public void processOverdue(final Blockable.Type type, final Blockable blockable, final InternalCallContext context) {
-        try {
-            factory.createOverdueWrapperFor(blockable).refresh(context);
-        } catch (BillingExceptionBase e) {
-            log.error(String.format("Error processing Overdue for blockable %s (type %s)", blockable.getId(), type), e);
+    public void clearOverdueForAccount(final UUID accountId, final InternalCallContext context) {
+        final List<SubscriptionBundle> bundles = entitlementApi.getBundlesForAccount(accountId, context);
+        for (final SubscriptionBundle bundle : bundles) {
+            clearOverdue(Type.SUBSCRIPTION_BUNDLE, bundle.getId(), context);
         }
     }
 
     public void processOverdue(final Blockable.Type type, final UUID blockableId, final InternalCallContext context) {
         try {
             factory.createOverdueWrapperFor(type, blockableId, context).refresh(context);
+        } catch (BillingExceptionBase e) {
+            log.error(String.format("Error processing Overdue for blockable %s (type %s)", blockableId, type), e);
+        }
+    }
+
+    public void clearOverdue(final Blockable.Type type, final UUID blockableId, final InternalCallContext context) {
+        try {
+            factory.createOverdueWrapperFor(type, blockableId, context).clear(context);
         } catch (BillingExceptionBase e) {
             log.error(String.format("Error processing Overdue for blockable %s (type %s)", blockableId, type), e);
         }

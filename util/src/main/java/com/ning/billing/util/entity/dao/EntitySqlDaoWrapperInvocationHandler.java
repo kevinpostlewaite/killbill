@@ -344,6 +344,8 @@ public class EntitySqlDaoWrapperInvocationHandler<S extends EntitySqlDao<M, E>, 
         sqlDao.addHistoryFromTransaction(history, context);
 
         final NonEntitySqlDao transactional = sqlDao.become(NonEntitySqlDao.class);
+
+        /* return transactional.getLastHistoryRecordId(entityRecordId, entityModelDao.getHistoryTableName().getTableName()); */
         return nonEntityDao.retrieveLastHistoryRecordIdFromTransaction(entityRecordId, entityModelDao.getHistoryTableName(), transactional);
     }
 

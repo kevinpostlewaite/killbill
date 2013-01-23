@@ -70,6 +70,7 @@ import com.ning.billing.util.glue.BusModule;
 import com.ning.billing.util.glue.CacheModule;
 import com.ning.billing.util.glue.NonEntityDaoModule;
 import com.ning.billing.util.glue.NotificationQueueModule;
+import com.ning.billing.util.glue.TagStoreModule;
 import com.ning.billing.util.notificationq.NotificationQueueService;
 import com.ning.billing.util.svcapi.account.AccountInternalApi;
 import com.ning.billing.util.svcapi.entitlement.EntitlementInternalApi;
@@ -119,7 +120,8 @@ public class TestOverdueCheckNotifier extends OverdueTestSuiteWithEmbeddedDB {
 
     @BeforeClass(groups = "slow")
     public void setup() throws ServiceException, IOException, ClassNotFoundException, SQLException, EntitlementUserApiException, AccountApiException {
-        final Injector g = Guice.createInjector(Stage.PRODUCTION, new MockInvoiceModule(), new MockPaymentModule(), new BusModule(), new DefaultOverdueModule() {
+        final Injector g = Guice.createInjector(Stage.PRODUCTION, new MockInvoiceModule(), new MockPaymentModule(), new BusModule(), new TagStoreModule(),
+                                                new DefaultOverdueModule() {
             @Override
             protected void configure() {
                 super.configure();

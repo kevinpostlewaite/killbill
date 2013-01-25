@@ -35,6 +35,8 @@ import com.ning.billing.catalog.api.PhaseType;
 import com.ning.billing.catalog.api.PlanPhaseSpecifier;
 import com.ning.billing.catalog.api.PriceListSet;
 import com.ning.billing.catalog.api.ProductCategory;
+import com.ning.billing.entitlement.EntitlementTestSuiteNoDB;
+import com.ning.billing.entitlement.EntitlementTestSuiteWithEmbeddedDB;
 import com.ning.billing.entitlement.api.SubscriptionApiService;
 import com.ning.billing.entitlement.api.SubscriptionTransitionType;
 import com.ning.billing.entitlement.api.timeline.EntitlementTimelineApi;
@@ -55,7 +57,7 @@ import com.ning.billing.util.dao.NonEntityDao;
 import com.google.common.collect.ImmutableList;
 
 // Simple unit tests for DefaultEntitlementTransferApi, see TestTransfer for more advanced tests with dao
-public class TestDefaultEntitlementTransferApi extends GuicyKillbillTestSuiteNoDB  {
+public class TestDefaultEntitlementTransferApi extends EntitlementTestSuiteNoDB {
 
     private DefaultEntitlementTransferApi transferApi;
 

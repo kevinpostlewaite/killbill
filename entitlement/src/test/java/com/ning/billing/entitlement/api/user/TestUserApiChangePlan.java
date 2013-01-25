@@ -27,6 +27,7 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import com.ning.billing.api.TestApiListener.NextEvent;
 import com.ning.billing.catalog.api.BillingPeriod;
@@ -36,13 +37,14 @@ import com.ning.billing.catalog.api.Plan;
 import com.ning.billing.catalog.api.PlanPhase;
 import com.ning.billing.catalog.api.PriceListSet;
 import com.ning.billing.catalog.api.ProductCategory;
-import com.ning.billing.entitlement.api.TestApiBase;
+import com.ning.billing.entitlement.EntitlementTestSuiteWithEmbeddedDB;
 import com.ning.billing.entitlement.events.EntitlementEvent;
 import com.ning.billing.entitlement.events.user.ApiEvent;
 import com.ning.billing.util.clock.DefaultClock;
 import com.ning.billing.util.svcapi.entitlement.EntitlementBillingApiException;
 
-public abstract class TestUserApiChangePlan extends TestApiBase {
+public class TestUserApiChangePlan extends EntitlementTestSuiteWithEmbeddedDB {
+
     private void checkChangePlan(final SubscriptionData subscription, final String expProduct, final ProductCategory expCategory,
                                  final BillingPeriod expBillingPeriod, final PhaseType expPhase) {
 
@@ -57,7 +59,8 @@ public abstract class TestUserApiChangePlan extends TestApiBase {
         assertEquals(currentPhase.getPhaseType(), expPhase);
     }
 
-    protected void testChangePlanBundleAlignEOTWithNoChargeThroughDate() {
+    @Test(groups = "slow")
+    public void testChangePlanBundleAlignEOTWithNoChargeThroughDate() {
         tChangePlanBundleAlignEOTWithNoChargeThroughDate("Shotgun", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, "Pistol", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
     }
 
@@ -94,7 +97,8 @@ public abstract class TestUserApiChangePlan extends TestApiBase {
         }
     }
 
-    protected void testChangePlanBundleAlignEOTWithChargeThroughDate() throws EntitlementBillingApiException {
+    @Test(groups = "slow")
+    public void testChangePlanBundleAlignEOTWithChargeThroughDate() throws EntitlementBillingApiException {
         testChangePlanBundleAlignEOTWithChargeThroughDate("Shotgun", BillingPeriod.ANNUAL, "gunclubDiscount", "Pistol", BillingPeriod.ANNUAL, "gunclubDiscount");
     }
 
@@ -156,7 +160,8 @@ public abstract class TestUserApiChangePlan extends TestApiBase {
         }
     }
 
-    protected void testChangePlanBundleAlignIMM() {
+    @Test(groups = "slow")
+    public void testChangePlanBundleAlignIMM() {
         tChangePlanBundleAlignIMM("Shotgun", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, "Assault-Rifle", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
     }
 
@@ -196,7 +201,8 @@ public abstract class TestUserApiChangePlan extends TestApiBase {
         }
     }
 
-    protected void testChangePlanChangePlanAlignEOTWithChargeThroughDate() throws EntitlementBillingApiException {
+    @Test(groups = "slow")
+    public void testChangePlanChangePlanAlignEOTWithChargeThroughDate() throws EntitlementBillingApiException {
         tChangePlanChangePlanAlignEOTWithChargeThroughDate("Shotgun", BillingPeriod.ANNUAL, PriceListSet.DEFAULT_PRICELIST_NAME, "Assault-Rifle", BillingPeriod.ANNUAL, "rescue");
     }
 
@@ -282,7 +288,8 @@ public abstract class TestUserApiChangePlan extends TestApiBase {
         }
     }
 
-    protected void testMultipleChangeLastIMM() throws EntitlementBillingApiException {
+    @Test(groups = "slow")
+    public void testMultipleChangeLastIMM() throws EntitlementBillingApiException {
         try {
             SubscriptionData subscription = createSubscription("Assault-Rifle", BillingPeriod.MONTHLY, "gunclubDiscount");
             final PlanPhase trialPhase = subscription.getCurrentPhase();
@@ -333,7 +340,8 @@ public abstract class TestUserApiChangePlan extends TestApiBase {
         }
     }
 
-    protected void testMultipleChangeLastEOT() throws EntitlementBillingApiException {
+    @Test(groups = "slow")
+    public void testMultipleChangeLastEOT() throws EntitlementBillingApiException {
         try {
             SubscriptionData subscription = createSubscription("Assault-Rifle", BillingPeriod.ANNUAL, "gunclubDiscount");
             final PlanPhase trialPhase = subscription.getCurrentPhase();
@@ -418,7 +426,8 @@ public abstract class TestUserApiChangePlan extends TestApiBase {
         }
     }
 
-    protected void testCorrectPhaseAlignmentOnChange() {
+    @Test(groups = "slow")
+    public void testCorrectPhaseAlignmentOnChange() {
         try {
             SubscriptionData subscription = createSubscription("Shotgun", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
             PlanPhase trialPhase = subscription.getCurrentPhase();

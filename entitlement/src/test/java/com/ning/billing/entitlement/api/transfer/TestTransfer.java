@@ -13,12 +13,8 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package com.ning.billing.entitlement.api.transfer;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+package com.ning.billing.entitlement.api.transfer;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,8 +31,8 @@ import com.ning.billing.catalog.api.PhaseType;
 import com.ning.billing.catalog.api.Plan;
 import com.ning.billing.catalog.api.PriceListSet;
 import com.ning.billing.catalog.api.Product;
+import com.ning.billing.entitlement.EntitlementTestSuiteWithEmbeddedDB;
 import com.ning.billing.entitlement.api.SubscriptionTransitionType;
-import com.ning.billing.entitlement.api.TestApiBase;
 import com.ning.billing.entitlement.api.migration.EntitlementMigrationApi.EntitlementAccountMigration;
 import com.ning.billing.entitlement.api.migration.EntitlementMigrationApiException;
 import com.ning.billing.entitlement.api.user.Subscription;
@@ -49,16 +45,14 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 
-public class TestTransfer extends TestApiBase {
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
+public class TestTransfer extends EntitlementTestSuiteWithEmbeddedDB {
 
     protected static final Logger log = LoggerFactory.getLogger(TestTransfer.class);
-
-
-    @Override
-    protected Injector getInjector() {
-        return Guice.createInjector(Stage.DEVELOPMENT, new MockEngineModuleSql());
-    }
-
 
 
     @Test(groups = "slow")

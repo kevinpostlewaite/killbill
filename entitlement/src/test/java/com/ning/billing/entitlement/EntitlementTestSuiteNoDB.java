@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2012 Ning, Inc.
+ * Copyright 2010-2013 Ning, Inc.
  *
  * Ning licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -35,7 +35,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
-import com.ning.billing.GuicyKillbillTestSuiteWithEmbeddedDB;
+import com.ning.billing.GuicyKillbillTestSuiteNoDB;
 import com.ning.billing.account.api.AccountData;
 import com.ning.billing.account.api.BillCycleDay;
 import com.ning.billing.api.TestApiListener;
@@ -64,7 +64,6 @@ import com.ning.billing.entitlement.engine.dao.EntitlementDao;
 import com.ning.billing.entitlement.engine.dao.MockEntitlementDaoMemory;
 import com.ning.billing.entitlement.events.EntitlementEvent;
 import com.ning.billing.entitlement.glue.MockEngineModuleMemory;
-import com.ning.billing.entitlement.glue.MockEngineModuleSql;
 import com.ning.billing.mock.MockAccountBuilder;
 import com.ning.billing.util.bus.DefaultBusService;
 import com.ning.billing.util.clock.ClockMock;
@@ -79,10 +78,10 @@ import com.google.inject.Stage;
 
 import static org.testng.Assert.assertNotNull;
 
-public class EntitlementTestSuiteWithEmbeddedDB extends GuicyKillbillTestSuiteWithEmbeddedDB  {
+public class EntitlementTestSuiteNoDB extends GuicyKillbillTestSuiteNoDB  {
 
 
-    protected static final Logger log = LoggerFactory.getLogger(EntitlementTestSuiteWithEmbeddedDB.class);
+    protected static final Logger log = LoggerFactory.getLogger(EntitlementTestSuiteNoDB.class);
 
     @Inject
     protected EntitlementService entitlementService;
@@ -138,7 +137,7 @@ public class EntitlementTestSuiteWithEmbeddedDB extends GuicyKillbillTestSuiteWi
         }
     }
 
-    @AfterClass(groups = "slow")
+    @AfterClass(alwaysRun = true)
     public void tearDown() {
         try {
             ((DefaultBusService) busService).stopBus();
@@ -148,10 +147,10 @@ public class EntitlementTestSuiteWithEmbeddedDB extends GuicyKillbillTestSuiteWi
     }
 
 
-    @BeforeClass(groups = "slow")
+    @BeforeClass(alwaysRun = true)
     public void setup() throws Exception {
         loadSystemPropertiesFromClasspath("/entitlement.properties");
-        final Injector g = Guice.createInjector(Stage.PRODUCTION, new MockEngineModuleSql());
+        final Injector g = Guice.createInjector(Stage.PRODUCTION, new MockEngineModuleMemory());
 
         g.injectMembers(this);
 
@@ -195,9 +194,12 @@ public class EntitlementTestSuiteWithEmbeddedDB extends GuicyKillbillTestSuiteWi
     }
 
 
-    @BeforeMethod(groups = "slow")
+    @BeforeMethod(alwaysRun = true)
     public void setupTest() throws Exception {
         log.warn("RESET TEST FRAMEWORK");
+
+        // CLEANUP ALL DB TABLES OR IN MEMORY STRUCTURES
+        ((MockEntitlementDaoMemory) dao).reset();
 
         // RESET LIST OF EXPECTED EVENTS
         if (testListener != null) {
@@ -225,7 +227,7 @@ public class EntitlementTestSuiteWithEmbeddedDB extends GuicyKillbillTestSuiteWi
         assertNotNull(bundle);
     }
 
-    @AfterMethod(groups = "slow")
+    @AfterMethod(alwaysRun = true)
     public void cleanupTest() throws Exception {
         // UNREGISTER TEST LISTENER AND STOP BUS
         busService.getBus().unregister(testListener);

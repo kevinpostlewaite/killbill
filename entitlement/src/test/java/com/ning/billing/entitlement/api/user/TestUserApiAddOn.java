@@ -39,21 +39,12 @@ import com.ning.billing.catalog.api.PlanPhase;
 import com.ning.billing.catalog.api.PlanSpecifier;
 import com.ning.billing.catalog.api.PriceListSet;
 import com.ning.billing.catalog.api.ProductCategory;
-import com.ning.billing.entitlement.api.TestApiBase;
+import com.ning.billing.entitlement.EntitlementTestSuiteWithEmbeddedDB;
 import com.ning.billing.entitlement.api.user.Subscription.SubscriptionState;
 import com.ning.billing.entitlement.api.user.SubscriptionStatusDryRun.DryRunChangeReason;
-import com.ning.billing.entitlement.glue.MockEngineModuleSql;
 import com.ning.billing.util.clock.DefaultClock;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Stage;
-
-public class TestUserApiAddOn extends TestApiBase {
-    @Override
-    public Injector getInjector() {
-        return Guice.createInjector(Stage.DEVELOPMENT, new MockEngineModuleSql());
-    }
+public class TestUserApiAddOn extends EntitlementTestSuiteWithEmbeddedDB {
 
     @Test(groups = "slow")
     public void testCreateCancelAddon() {

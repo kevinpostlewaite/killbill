@@ -37,24 +37,14 @@ import com.ning.billing.catalog.api.BillingPeriod;
 import com.ning.billing.catalog.api.Duration;
 import com.ning.billing.catalog.api.PlanPhase;
 import com.ning.billing.catalog.api.PriceListSet;
-import com.ning.billing.entitlement.api.TestApiBase;
+import com.ning.billing.entitlement.EntitlementTestSuiteNoDB;
 import com.ning.billing.entitlement.exceptions.EntitlementError;
-import com.ning.billing.entitlement.glue.MockEngineModuleMemory;
 import com.ning.billing.util.callcontext.TenantContext;
 import com.ning.billing.util.clock.DefaultClock;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Stage;
-
-public class TestUserApiError extends TestApiBase {
+public class TestUserApiError extends EntitlementTestSuiteNoDB {
 
     private final TenantContext tenantContext = Mockito.mock(TenantContext.class);
-
-    @Override
-    protected Injector getInjector() {
-        return Guice.createInjector(Stage.DEVELOPMENT, new MockEngineModuleMemory());
-    }
 
     @Test(groups = "fast")
     public void testCreateSubscriptionBadCatalog() {

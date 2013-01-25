@@ -24,6 +24,7 @@ import static org.testng.Assert.assertTrue;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import com.ning.billing.api.TestApiListener.NextEvent;
 import com.ning.billing.catalog.api.BillingPeriod;
@@ -32,12 +33,14 @@ import com.ning.billing.catalog.api.PhaseType;
 import com.ning.billing.catalog.api.Plan;
 import com.ning.billing.catalog.api.PlanPhase;
 import com.ning.billing.catalog.api.PriceListSet;
-import com.ning.billing.entitlement.api.TestApiBase;
+import com.ning.billing.entitlement.EntitlementTestSuiteWithEmbeddedDB;
 import com.ning.billing.util.clock.DefaultClock;
 import com.ning.billing.util.svcapi.entitlement.EntitlementBillingApiException;
 
-public abstract class TestUserApiCancel extends TestApiBase {
-    protected void testCancelSubscriptionIMM() {
+public class TestUserApiCancel extends EntitlementTestSuiteWithEmbeddedDB {
+
+    @Test(groups = "slow")
+    public void testCancelSubscriptionIMM() {
         try {
             final DateTime init = clock.getUTCNow();
 
@@ -83,7 +86,8 @@ public abstract class TestUserApiCancel extends TestApiBase {
         }
     }
 
-    protected void testCancelSubscriptionEOTWithChargeThroughDate() throws EntitlementBillingApiException {
+    @Test(groups = "slow")
+    public void testCancelSubscriptionEOTWithChargeThroughDate() throws EntitlementBillingApiException {
         try {
             final String prod = "Shotgun";
             final BillingPeriod term = BillingPeriod.MONTHLY;
@@ -159,7 +163,8 @@ public abstract class TestUserApiCancel extends TestApiBase {
         }
     }
 
-    protected void testCancelSubscriptionEOTWithNoChargeThroughDate() {
+    @Test(groups = "slow")
+    public void testCancelSubscriptionEOTWithNoChargeThroughDate() {
         try {
             final String prod = "Shotgun";
             final BillingPeriod term = BillingPeriod.MONTHLY;
@@ -202,7 +207,8 @@ public abstract class TestUserApiCancel extends TestApiBase {
     // Similar test to testCancelSubscriptionEOTWithChargeThroughDate except we uncancel and check things
     // are as they used to be and we can move forward without hitting cancellation
     //
-    protected void testUncancel() throws EntitlementBillingApiException {
+    @Test(groups = "slow")
+    public void testUncancel() throws EntitlementBillingApiException {
         try {
             final String prod = "Shotgun";
             final BillingPeriod term = BillingPeriod.MONTHLY;

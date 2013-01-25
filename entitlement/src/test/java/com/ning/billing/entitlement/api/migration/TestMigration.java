@@ -33,7 +33,7 @@ import com.ning.billing.catalog.api.BillingPeriod;
 import com.ning.billing.catalog.api.PhaseType;
 import com.ning.billing.catalog.api.PriceListSet;
 import com.ning.billing.catalog.api.ProductCategory;
-import com.ning.billing.entitlement.api.TestApiBase;
+import com.ning.billing.entitlement.EntitlementTestSuiteWithEmbeddedDB;
 import com.ning.billing.entitlement.api.migration.EntitlementMigrationApi.EntitlementAccountMigration;
 import com.ning.billing.entitlement.api.user.Subscription;
 import com.ning.billing.entitlement.api.user.Subscription.SubscriptionState;
@@ -42,7 +42,10 @@ import com.ning.billing.entitlement.api.user.SubscriptionData;
 import com.ning.billing.entitlement.api.user.SubscriptionTransitionData;
 import com.ning.billing.entitlement.events.user.ApiEventType;
 
-public abstract class TestMigration extends TestApiBase {
+
+public class TestMigration extends EntitlementTestSuiteWithEmbeddedDB {
+
+    @Test(groups = "slow")
     public void testSingleBasePlan() {
         try {
             final DateTime startDate = clock.getUTCNow().minusMonths(2);
@@ -75,6 +78,7 @@ public abstract class TestMigration extends TestApiBase {
         }
     }
 
+    @Test(groups = "slow")
     public void testPlanWithAddOn() {
         try {
             final DateTime beforeMigration = clock.getUTCNow();
@@ -123,6 +127,7 @@ public abstract class TestMigration extends TestApiBase {
         }
     }
 
+    @Test(groups = "slow")
     public void testSingleBasePlanFutureCancelled() {
 
         try {
@@ -172,6 +177,7 @@ public abstract class TestMigration extends TestApiBase {
         }
     }
 
+    @Test(groups = "slow")
     public void testSingleBasePlanWithPendingPhase() {
         try {
             final DateTime trialDate = clock.getUTCNow().minusDays(10);
@@ -218,6 +224,7 @@ public abstract class TestMigration extends TestApiBase {
         }
     }
 
+    @Test(groups = "slow")
     public void testSingleBasePlanWithPendingChange() {
         try {
             final DateTime beforeMigration = clock.getUTCNow();
@@ -263,6 +270,7 @@ public abstract class TestMigration extends TestApiBase {
         }
     }
 
+    @Test(groups = "slow")
     public void testChangePriorMigrateBilling() throws Exception {
         try {
             final DateTime startDate = clock.getUTCNow().minusMonths(2);

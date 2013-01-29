@@ -73,7 +73,7 @@ public class TestUserApiError extends EntitlementTestSuiteNoDB {
     @Test(groups = "fast")
     public void testCreateSubscriptionBPExists() {
         try {
-            createSubscription("Shotgun", BillingPeriod.ANNUAL, PriceListSet.DEFAULT_PRICELIST_NAME);
+            testUtil.createSubscription(bundle, "Shotgun", BillingPeriod.ANNUAL, PriceListSet.DEFAULT_PRICELIST_NAME);
             tCreateSubscriptionInternal(bundle.getId(), "Shotgun", BillingPeriod.ANNUAL, PriceListSet.DEFAULT_PRICELIST_NAME, ErrorCode.ENT_CREATE_BP_EXISTS);
         } catch (Exception e) {
             Assert.fail(e.toString());
@@ -83,9 +83,9 @@ public class TestUserApiError extends EntitlementTestSuiteNoDB {
     @Test(groups = "fast")
     public void testRecreateSubscriptionBPNotCancelled() {
         try {
-            final SubscriptionData subscription = createSubscription("Shotgun", BillingPeriod.ANNUAL, PriceListSet.DEFAULT_PRICELIST_NAME);
+            final SubscriptionData subscription = testUtil.createSubscription(bundle, "Shotgun", BillingPeriod.ANNUAL, PriceListSet.DEFAULT_PRICELIST_NAME);
             try {
-                subscription.recreate(getProductSpecifier("Pistol", PriceListSet.DEFAULT_PRICELIST_NAME, BillingPeriod.MONTHLY, null), clock.getUTCNow(), callContext);
+                subscription.recreate(testUtil.getProductSpecifier("Pistol", PriceListSet.DEFAULT_PRICELIST_NAME, BillingPeriod.MONTHLY, null), clock.getUTCNow(), callContext);
                 Assert.assertFalse(true);
             } catch (EntitlementUserApiException e) {
                 assertEquals(e.getCode(), ErrorCode.ENT_RECREATE_BAD_STATE.getCode());
@@ -100,7 +100,7 @@ public class TestUserApiError extends EntitlementTestSuiteNoDB {
         try {
             final UUID accountId = UUID.randomUUID();
             final SubscriptionBundle aoBundle = entitlementApi.createBundleForAccount(accountId, "myAOBundle", callContext);
-            createSubscriptionWithBundle(aoBundle.getId(), "Pistol", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, null);
+            testUtil.createSubscriptionWithBundle(aoBundle.getId(), "Pistol", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, null);
             tCreateSubscriptionInternal(aoBundle.getId(), "Telescopic-Scope", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, ErrorCode.ENT_CREATE_AO_NOT_AVAILABLE);
         } catch (Exception e) {
             Assert.fail(e.toString());
@@ -113,7 +113,7 @@ public class TestUserApiError extends EntitlementTestSuiteNoDB {
         try {
             final UUID accountId = UUID.randomUUID();
             final SubscriptionBundle aoBundle = entitlementApi.createBundleForAccount(accountId, "myAOBundle", callContext);
-            createSubscriptionWithBundle(aoBundle.getId(), "Assault-Rifle", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, null);
+            testUtil.createSubscriptionWithBundle(aoBundle.getId(), "Assault-Rifle", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, null);
             tCreateSubscriptionInternal(aoBundle.getId(), "Telescopic-Scope", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, ErrorCode.ENT_CREATE_AO_ALREADY_INCLUDED);
         } catch (Exception e) {
             Assert.fail(e.toString());
@@ -124,7 +124,7 @@ public class TestUserApiError extends EntitlementTestSuiteNoDB {
                                              @Nullable final BillingPeriod term, final String planSet, final ErrorCode expected) {
         try {
             entitlementApi.createSubscription(bundleId,
-                                              getProductSpecifier(productName, planSet, term, null),
+                                              testUtil.getProductSpecifier(productName, planSet, term, null),
                                               clock.getUTCNow(), callContext);
             Assert.fail("Exception expected, error code: " + expected);
         } catch (EntitlementUserApiException e) {
@@ -140,7 +140,7 @@ public class TestUserApiError extends EntitlementTestSuiteNoDB {
     @Test(groups = "fast")
     public void testChangeSubscriptionNonActive() {
         try {
-            final Subscription subscription = createSubscription("Shotgun", BillingPeriod.ANNUAL, PriceListSet.DEFAULT_PRICELIST_NAME);
+            final Subscription subscription = testUtil.createSubscription(bundle, "Shotgun", BillingPeriod.ANNUAL, PriceListSet.DEFAULT_PRICELIST_NAME);
 
             testListener.pushExpectedEvent(NextEvent.CANCEL);
             subscription.cancel(clock.getUTCNow(), callContext);
@@ -161,7 +161,7 @@ public class TestUserApiError extends EntitlementTestSuiteNoDB {
 
     @Test(groups = "fast")
     public void testChangeSubscriptionWithPolicy() throws Exception {
-        final Subscription subscription = createSubscription("Shotgun", BillingPeriod.ANNUAL, PriceListSet.DEFAULT_PRICELIST_NAME);
+        final Subscription subscription = testUtil.createSubscription(bundle, "Shotgun", BillingPeriod.ANNUAL, PriceListSet.DEFAULT_PRICELIST_NAME);
 
         try {
             subscription.changePlanWithPolicy("Shotgun", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, clock.getUTCNow(), ActionPolicy.ILLEGAL, callContext);
@@ -178,7 +178,7 @@ public class TestUserApiError extends EntitlementTestSuiteNoDB {
     @Test(groups = "fast")
     public void testChangeSubscriptionFutureCancelled() {
         try {
-            Subscription subscription = createSubscription("Shotgun", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
+            Subscription subscription = testUtil.createSubscription(bundle, "Shotgun", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
             final PlanPhase trialPhase = subscription.getCurrentPhase();
 
             // MOVE TO NEXT PHASE
@@ -190,7 +190,7 @@ public class TestUserApiError extends EntitlementTestSuiteNoDB {
 
             // SET CTD TO CANCEL IN FUTURE
             final DateTime expectedPhaseTrialChange = DefaultClock.addDuration(subscription.getStartDate(), trialPhase.getDuration());
-            final Duration ctd = getDurationMonth(1);
+            final Duration ctd = testUtil.getDurationMonth(1);
             final DateTime newChargedThroughDate = DefaultClock.addDuration(expectedPhaseTrialChange, ctd);
             entitlementInternalApi.setChargedThroughDate(subscription.getId(), newChargedThroughDate.toLocalDate(), internalCallContext);
 
@@ -221,7 +221,7 @@ public class TestUserApiError extends EntitlementTestSuiteNoDB {
     @Test(groups = "fast")
     public void testUncancelBadState() {
         try {
-            final Subscription subscription = createSubscription("Shotgun", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
+            final Subscription subscription = testUtil.createSubscription(bundle, "Shotgun", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
 
             try {
                 subscription.uncancel(callContext);

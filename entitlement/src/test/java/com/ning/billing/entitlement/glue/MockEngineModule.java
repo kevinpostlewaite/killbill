@@ -22,6 +22,8 @@ import com.ning.billing.account.api.AccountUserApi;
 import com.ning.billing.api.TestApiListener;
 import com.ning.billing.api.TestListenerStatus;
 import com.ning.billing.catalog.glue.CatalogModule;
+import com.ning.billing.entitlement.DefaultEntitlementTestInitializer;
+import com.ning.billing.entitlement.EntitlementTestInitializer;
 import com.ning.billing.entitlement.EntitlementTestListenerStatus;
 import com.ning.billing.entitlement.api.user.DefaultEntitlementUserApi;
 import com.ning.billing.entitlement.api.user.EntitlementUserApi;
@@ -52,5 +54,6 @@ public class MockEngineModule extends DefaultEntitlementModule {
         bind(TestUtil.class).asEagerSingleton();
         bind(TestListenerStatus.class).to(EntitlementTestListenerStatus.class).asEagerSingleton();
         bind(TestApiListener.class).asEagerSingleton();
+        bind(EntitlementTestInitializer.class).to(DefaultEntitlementTestInitializer.class).asEagerSingleton();
     }
 }

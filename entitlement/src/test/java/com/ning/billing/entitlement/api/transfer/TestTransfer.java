@@ -63,7 +63,7 @@ public class TestTransfer extends EntitlementTestSuiteWithEmbeddedDB {
         try {
             final DateTime startDate = clock.getUTCNow().minusMonths(2);
             final DateTime beforeMigration = clock.getUTCNow();
-            final EntitlementAccountMigration toBeMigrated = createAccountForMigrationWithRegularBasePlan(startDate);
+            final EntitlementAccountMigration toBeMigrated = testUtil.createAccountForMigrationWithRegularBasePlan(startDate);
             final DateTime afterMigration = clock.getUTCNow();
 
             testListener.pushExpectedEvent(NextEvent.MIGRATE_ENTITLEMENT);
@@ -77,7 +77,7 @@ public class TestTransfer extends EntitlementTestSuiteWithEmbeddedDB {
             final List<Subscription> subscriptions = entitlementApi.getSubscriptionsForBundle(bundle.getId(), callContext);
             assertEquals(subscriptions.size(), 1);
             final Subscription subscription = subscriptions.get(0);
-            assertDateWithin(subscription.getStartDate(), beforeMigration.minusMonths(2), afterMigration.minusMonths(2));
+            testUtil.assertDateWithin(subscription.getStartDate(), beforeMigration.minusMonths(2), afterMigration.minusMonths(2));
             assertEquals(subscription.getEndDate(), null);
             assertEquals(subscription.getCurrentPriceList().getName(), PriceListSet.DEFAULT_PRICELIST_NAME);
             assertEquals(subscription.getCurrentPhase().getPhaseType(), PhaseType.EVERGREEN);
@@ -124,7 +124,7 @@ public class TestTransfer extends EntitlementTestSuiteWithEmbeddedDB {
         final String basePriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
         // CREATE BP
-        final Subscription baseSubscription = createSubscription(baseProduct, baseTerm, basePriceList);
+        final Subscription baseSubscription = testUtil.createSubscription(bundle, baseProduct, baseTerm, basePriceList);
 
         final DateTime evergreenPhaseDate = ((SubscriptionData) baseSubscription).getPendingTransition().getEffectiveTransitionTime();
 
@@ -143,7 +143,7 @@ public class TestTransfer extends EntitlementTestSuiteWithEmbeddedDB {
         // CHECK OLD BASE IS CANCEL AT THE TRANSFER DATE
         final Subscription oldBaseSubscription = entitlementApi.getSubscriptionFromId(baseSubscription.getId(), callContext);
         assertNotNull(oldBaseSubscription.getEndDate());
-        assertDateWithin(oldBaseSubscription.getEndDate(), beforeTransferDate, afterTransferDate);
+        testUtil.assertDateWithin(oldBaseSubscription.getEndDate(), beforeTransferDate, afterTransferDate);
         assertTrue(oldBaseSubscription.getEndDate().compareTo(transferRequestedDate) == 0);
 
         // CHECK NEW BUNDLE EXIST, WITH ONE SUBSCRIPTION STARTING ON TRANSFER_DATE
@@ -175,7 +175,7 @@ public class TestTransfer extends EntitlementTestSuiteWithEmbeddedDB {
         final String basePriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
         // CREATE BP
-        final Subscription baseSubscription = createSubscription(baseProduct, baseTerm, basePriceList);
+        final Subscription baseSubscription = testUtil.createSubscription(bundle, baseProduct, baseTerm, basePriceList);
         final DateTime ctd = baseSubscription.getStartDate().plusDays(30);
 
         entitlementInternalApi.setChargedThroughDate(baseSubscription.getId(), ctd.toLocalDate(), internalCallContext);
@@ -224,7 +224,7 @@ public class TestTransfer extends EntitlementTestSuiteWithEmbeddedDB {
         final String basePriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
         // CREATE BP
-        final Subscription baseSubscription = createSubscription(baseProduct, baseTerm, basePriceList);
+        final Subscription baseSubscription = testUtil.createSubscription(bundle, baseProduct, baseTerm, basePriceList);
 
         // MOVE AFTER TRIAL
         testListener.pushExpectedEvent(NextEvent.PHASE);
@@ -242,7 +242,7 @@ public class TestTransfer extends EntitlementTestSuiteWithEmbeddedDB {
         // CHECK OLD BASE IS CANCEL AT THE TRANSFER DATE
         final Subscription oldBaseSubscription = entitlementApi.getSubscriptionFromId(baseSubscription.getId(), callContext);
         assertNotNull(oldBaseSubscription.getEndDate());
-        assertDateWithin(oldBaseSubscription.getEndDate(), beforeTransferDate, afterTransferDate);
+        testUtil.assertDateWithin(oldBaseSubscription.getEndDate(), beforeTransferDate, afterTransferDate);
         assertTrue(oldBaseSubscription.getEndDate().compareTo(transferRequestedDate) == 0);
 
         // CHECK NEW BUNDLE EXIST, WITH ONE SUBSCRIPTION STARTING ON TRANSFER_DATE
@@ -272,7 +272,7 @@ public class TestTransfer extends EntitlementTestSuiteWithEmbeddedDB {
         final String basePriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
         // CREATE BP
-        final Subscription baseSubscription = createSubscription(baseProduct, baseTerm, basePriceList);
+        final Subscription baseSubscription = testUtil.createSubscription(bundle, baseProduct, baseTerm, basePriceList);
 
         // MOVE AFTER TRIAL
         testListener.pushExpectedEvent(NextEvent.PHASE);
@@ -352,13 +352,13 @@ public class TestTransfer extends EntitlementTestSuiteWithEmbeddedDB {
         final String basePriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
         // CREATE BP
-        final Subscription baseSubscription = createSubscription(baseProduct, baseTerm, basePriceList);
+        final Subscription baseSubscription = testUtil.createSubscription(bundle, baseProduct, baseTerm, basePriceList);
 
         // MOVE 3 DAYS AND CREATE AO1
         clock.addDays(3);
         final String aoProduct1 = "Telescopic-Scope";
         final BillingPeriod aoTerm1 = BillingPeriod.MONTHLY;
-        final SubscriptionData aoSubscription1 = createSubscription(aoProduct1, aoTerm1, basePriceList);
+        final SubscriptionData aoSubscription1 = testUtil.createSubscription(bundle, aoProduct1, aoTerm1, basePriceList);
         assertEquals(aoSubscription1.getState(), SubscriptionState.ACTIVE);
 
         // MOVE ANOTHER 25 DAYS AND CREATE AO2 [ BP STILL IN TRIAL]
@@ -366,7 +366,7 @@ public class TestTransfer extends EntitlementTestSuiteWithEmbeddedDB {
         clock.addDays(25);
         final String aoProduct2 = "Laser-Scope";
         final BillingPeriod aoTerm2 = BillingPeriod.MONTHLY;
-        final SubscriptionData aoSubscription2 = createSubscription(aoProduct2, aoTerm2, basePriceList);
+        final SubscriptionData aoSubscription2 = testUtil.createSubscription(bundle, aoProduct2, aoTerm2, basePriceList);
         assertEquals(aoSubscription2.getState(), SubscriptionState.ACTIVE);
 
         // MOVE AFTER TRIAL AND AO DISCOUNT PHASE [LASER SCOPE STILL IN DISCOUNT]

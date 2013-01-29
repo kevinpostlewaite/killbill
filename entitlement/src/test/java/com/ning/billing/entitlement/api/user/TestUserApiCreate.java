@@ -59,7 +59,7 @@ public class TestUserApiCreate extends EntitlementTestSuiteWithEmbeddedDB {
             testListener.pushExpectedEvent(NextEvent.CREATE);
 
             final SubscriptionData subscription = (SubscriptionData) entitlementApi.createSubscription(bundle.getId(),
-                                                                                                       getProductSpecifier(productName, planSetName, term, null), requestedDate, callContext);
+                                                                                                       testUtil.getProductSpecifier(productName, planSetName, term, null), requestedDate, callContext);
             assertNotNull(subscription);
 
             assertEquals(subscription.getActiveVersion(), SubscriptionEvents.INITIAL_VERSION);
@@ -89,14 +89,14 @@ public class TestUserApiCreate extends EntitlementTestSuiteWithEmbeddedDB {
             testListener.pushExpectedEvent(NextEvent.CREATE);
 
             final SubscriptionData subscription = (SubscriptionData) entitlementApi.createSubscription(bundle.getId(),
-                                                                                                       getProductSpecifier(productName, planSetName, term, PhaseType.EVERGREEN), clock.getUTCNow(), callContext);
+                                                                                                       testUtil.getProductSpecifier(productName, planSetName, term, PhaseType.EVERGREEN), clock.getUTCNow(), callContext);
             assertNotNull(subscription);
 
             assertEquals(subscription.getActiveVersion(), SubscriptionEvents.INITIAL_VERSION);
             //assertEquals(subscription.getAccount(), account.getId());
             assertEquals(subscription.getBundleId(), bundle.getId());
-            assertDateWithin(subscription.getStartDate(), init, clock.getUTCNow());
-            assertDateWithin(subscription.getBundleStartDate(), init, clock.getUTCNow());
+            testUtil.assertDateWithin(subscription.getStartDate(), init, clock.getUTCNow());
+            testUtil.assertDateWithin(subscription.getBundleStartDate(), init, clock.getUTCNow());
 
             final Plan currentPlan = subscription.getCurrentPlan();
             assertNotNull(currentPlan);
@@ -127,15 +127,15 @@ public class TestUserApiCreate extends EntitlementTestSuiteWithEmbeddedDB {
             testListener.pushExpectedEvent(NextEvent.CREATE);
 
             final SubscriptionData subscription = (SubscriptionData) entitlementApi.createSubscription(bundle.getId(),
-                                                                                                       getProductSpecifier(productName, planSetName, term, null),
+                                                                                                       testUtil.getProductSpecifier(productName, planSetName, term, null),
                                                                                                        clock.getUTCNow(), callContext);
             assertNotNull(subscription);
 
             assertEquals(subscription.getActiveVersion(), SubscriptionEvents.INITIAL_VERSION);
             //assertEquals(subscription.getAccount(), account.getId());
             assertEquals(subscription.getBundleId(), bundle.getId());
-            assertDateWithin(subscription.getStartDate(), init, clock.getUTCNow());
-            assertDateWithin(subscription.getBundleStartDate(), init, clock.getUTCNow());
+            testUtil.assertDateWithin(subscription.getStartDate(), init, clock.getUTCNow());
+            testUtil.assertDateWithin(subscription.getBundleStartDate(), init, clock.getUTCNow());
 
             final Plan currentPlan = subscription.getCurrentPlan();
             assertNotNull(currentPlan);
@@ -150,7 +150,7 @@ public class TestUserApiCreate extends EntitlementTestSuiteWithEmbeddedDB {
 
             final List<EntitlementEvent> events = dao.getPendingEventsForSubscription(subscription.getId(), internalCallContext);
             assertNotNull(events);
-            printEvents(events);
+            testUtil.printEvents(events);
             assertTrue(events.size() == 1);
             assertTrue(events.get(0) instanceof PhaseEvent);
             final DateTime nextPhaseChange = ((PhaseEvent) events.get(0)).getEffectiveDate();
@@ -183,7 +183,7 @@ public class TestUserApiCreate extends EntitlementTestSuiteWithEmbeddedDB {
 
             // CREATE SUBSCRIPTION
             SubscriptionData subscription = (SubscriptionData) entitlementApi.createSubscription(bundle.getId(),
-                                                                                                 getProductSpecifier(productName, planSetName, term, null), clock.getUTCNow(), callContext);
+                                                                                                 testUtil.getProductSpecifier(productName, planSetName, term, null), clock.getUTCNow(), callContext);
             assertNotNull(subscription);
 
             PlanPhase currentPhase = subscription.getCurrentPhase();
@@ -227,7 +227,7 @@ public class TestUserApiCreate extends EntitlementTestSuiteWithEmbeddedDB {
             testListener.pushExpectedEvent(NextEvent.CREATE);
 
             final SubscriptionData subscription = (SubscriptionData) entitlementApi.createSubscription(bundle.getId(),
-                                                                                                       getProductSpecifier(productName, planSetName, term, null), clock.getUTCNow(), callContext);
+                                                                                                       testUtil.getProductSpecifier(productName, planSetName, term, null), clock.getUTCNow(), callContext);
             assertNotNull(subscription);
 
             assertListenerStatus();

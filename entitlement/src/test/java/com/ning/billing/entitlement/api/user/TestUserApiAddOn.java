@@ -53,13 +53,13 @@ public class TestUserApiAddOn extends EntitlementTestSuiteWithEmbeddedDB {
             final BillingPeriod baseTerm = BillingPeriod.MONTHLY;
             final String basePriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
-            createSubscription(baseProduct, baseTerm, basePriceList);
+            testUtil.createSubscription(bundle, baseProduct, baseTerm, basePriceList);
 
             final String aoProduct = "Telescopic-Scope";
             final BillingPeriod aoTerm = BillingPeriod.MONTHLY;
             final String aoPriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
-            final SubscriptionData aoSubscription = createSubscription(aoProduct, aoTerm, aoPriceList);
+            final SubscriptionData aoSubscription = testUtil.createSubscription(bundle, aoProduct, aoTerm, aoPriceList);
             assertEquals(aoSubscription.getState(), SubscriptionState.ACTIVE);
 
             final DateTime now = clock.getUTCNow();
@@ -85,13 +85,13 @@ public class TestUserApiAddOn extends EntitlementTestSuiteWithEmbeddedDB {
             final String basePriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
             // CREATE BP
-            SubscriptionData baseSubscription = createSubscription(baseProduct, baseTerm, basePriceList);
+            SubscriptionData baseSubscription = testUtil.createSubscription(bundle, baseProduct, baseTerm, basePriceList);
 
             final String aoProduct = "Telescopic-Scope";
             final BillingPeriod aoTerm = BillingPeriod.MONTHLY;
             final String aoPriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
-            SubscriptionData aoSubscription = createSubscription(aoProduct, aoTerm, aoPriceList);
+            SubscriptionData aoSubscription = testUtil.createSubscription(bundle, aoProduct, aoTerm, aoPriceList);
 
             testListener.reset();
             testListener.pushExpectedEvent(NextEvent.PHASE);
@@ -104,7 +104,7 @@ public class TestUserApiAddOn extends EntitlementTestSuiteWithEmbeddedDB {
 
             // SET CTD TO CANCEL IN FUTURE
             final DateTime now = clock.getUTCNow();
-            final Duration ctd = getDurationMonth(1);
+            final Duration ctd = testUtil.getDurationMonth(1);
             // Why not just use clock.getUTCNow().plusMonths(1) ?
             final DateTime newChargedThroughDate = DefaultClock.addDuration(now, ctd);
             entitlementInternalApi.setChargedThroughDate(baseSubscription.getId(), newChargedThroughDate.toLocalDate(), internalCallContext);
@@ -146,13 +146,13 @@ public class TestUserApiAddOn extends EntitlementTestSuiteWithEmbeddedDB {
             final String basePriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
             // CREATE BP
-            SubscriptionData baseSubscription = createSubscription(baseProduct, baseTerm, basePriceList);
+            SubscriptionData baseSubscription = testUtil.createSubscription(bundle, baseProduct, baseTerm, basePriceList);
 
             final String aoProduct = "Telescopic-Scope";
             final BillingPeriod aoTerm = BillingPeriod.MONTHLY;
             final String aoPriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
-            SubscriptionData aoSubscription = createSubscription(aoProduct, aoTerm, aoPriceList);
+            SubscriptionData aoSubscription = testUtil.createSubscription(bundle, aoProduct, aoTerm, aoPriceList);
 
             testListener.reset();
             testListener.pushExpectedEvent(NextEvent.PHASE);
@@ -165,7 +165,7 @@ public class TestUserApiAddOn extends EntitlementTestSuiteWithEmbeddedDB {
 
             // SET CTD TO CHANGE IN FUTURE
             final DateTime now = clock.getUTCNow();
-            final Duration ctd = getDurationMonth(1);
+            final Duration ctd = testUtil.getDurationMonth(1);
             final DateTime newChargedThroughDate = DefaultClock.addDuration(now, ctd);
             entitlementInternalApi.setChargedThroughDate(baseSubscription.getId(), newChargedThroughDate.toLocalDate(), internalCallContext);
             baseSubscription = (SubscriptionData) entitlementApi.getSubscriptionFromId(baseSubscription.getId(), callContext);
@@ -209,13 +209,13 @@ public class TestUserApiAddOn extends EntitlementTestSuiteWithEmbeddedDB {
             final String basePriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
             // CREATE BP
-            SubscriptionData baseSubscription = createSubscription(baseProduct, baseTerm, basePriceList);
+            SubscriptionData baseSubscription = testUtil.createSubscription(bundle, baseProduct, baseTerm, basePriceList);
 
             final String aoProduct = "Telescopic-Scope";
             final BillingPeriod aoTerm = BillingPeriod.MONTHLY;
             final String aoPriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
-            SubscriptionData aoSubscription = createSubscription(aoProduct, aoTerm, aoPriceList);
+            SubscriptionData aoSubscription = testUtil.createSubscription(bundle, aoProduct, aoTerm, aoPriceList);
 
             testListener.reset();
             testListener.pushExpectedEvent(NextEvent.PHASE);
@@ -228,7 +228,7 @@ public class TestUserApiAddOn extends EntitlementTestSuiteWithEmbeddedDB {
 
             // SET CTD TO CANCEL IN FUTURE
             final DateTime now = clock.getUTCNow();
-            final Duration ctd = getDurationMonth(1);
+            final Duration ctd = testUtil.getDurationMonth(1);
             final DateTime newChargedThroughDate = DefaultClock.addDuration(now, ctd);
             entitlementInternalApi.setChargedThroughDate(baseSubscription.getId(), newChargedThroughDate.toLocalDate(), internalCallContext);
             baseSubscription = (SubscriptionData) entitlementApi.getSubscriptionFromId(baseSubscription.getId(), callContext);
@@ -326,7 +326,7 @@ public class TestUserApiAddOn extends EntitlementTestSuiteWithEmbeddedDB {
             final String basePriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
             // CREATE BP
-            final SubscriptionData baseSubscription = createSubscription(baseProduct, baseTerm, basePriceList);
+            final SubscriptionData baseSubscription = testUtil.createSubscription(bundle, baseProduct, baseTerm, basePriceList);
 
             // MOVE CLOCK 14 DAYS LATER
             Interval it = new Interval(clock.getUTCNow(), clock.getUTCNow().plusDays(14));
@@ -334,7 +334,7 @@ public class TestUserApiAddOn extends EntitlementTestSuiteWithEmbeddedDB {
 
             // CREATE ADDON
             final DateTime beforeAOCreation = clock.getUTCNow();
-            SubscriptionData aoSubscription = createSubscription(aoProduct, aoTerm, aoPriceList);
+            SubscriptionData aoSubscription = testUtil.createSubscription(bundle, aoProduct, aoTerm, aoPriceList);
             final DateTime afterAOCreation = clock.getUTCNow();
 
             // CHECK EVERYTHING
@@ -348,7 +348,7 @@ public class TestUserApiAddOn extends EntitlementTestSuiteWithEmbeddedDB {
             assertNotNull(aoCurrentPhase);
             assertEquals(aoCurrentPhase.getPhaseType(), PhaseType.DISCOUNT);
 
-            assertDateWithin(aoSubscription.getStartDate(), beforeAOCreation, afterAOCreation);
+            testUtil.assertDateWithin(aoSubscription.getStartDate(), beforeAOCreation, afterAOCreation);
             assertEquals(aoSubscription.getBundleStartDate(), baseSubscription.getBundleStartDate());
 
             // CHECK next AO PHASE EVENT IS INDEED A MONTH AFTER BP STARTED => BUNDLE ALIGNMENT

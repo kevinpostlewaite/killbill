@@ -16,20 +16,10 @@
 
 package com.ning.billing.entitlement;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-import java.util.UUID;
-
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -37,39 +27,21 @@ import org.testng.annotations.BeforeMethod;
 
 import com.ning.billing.GuicyKillbillTestSuiteWithEmbeddedDB;
 import com.ning.billing.account.api.AccountData;
-import com.ning.billing.account.api.BillCycleDay;
 import com.ning.billing.api.TestApiListener;
 import com.ning.billing.api.TestListenerStatus;
-import com.ning.billing.catalog.DefaultCatalogService;
-import com.ning.billing.catalog.api.BillingPeriod;
 import com.ning.billing.catalog.api.Catalog;
 import com.ning.billing.catalog.api.CatalogService;
-import com.ning.billing.catalog.api.Currency;
-import com.ning.billing.catalog.api.Duration;
-import com.ning.billing.catalog.api.PhaseType;
-import com.ning.billing.catalog.api.PlanPhaseSpecifier;
 import com.ning.billing.entitlement.api.EntitlementService;
 import com.ning.billing.entitlement.api.migration.EntitlementMigrationApi;
-import com.ning.billing.entitlement.api.migration.EntitlementMigrationApi.EntitlementAccountMigration;
 import com.ning.billing.entitlement.api.timeline.EntitlementTimelineApi;
 import com.ning.billing.entitlement.api.transfer.EntitlementTransferApi;
 import com.ning.billing.entitlement.api.user.EntitlementUserApi;
-import com.ning.billing.entitlement.api.user.EntitlementUserApiException;
 import com.ning.billing.entitlement.api.user.SubscriptionBundle;
-import com.ning.billing.entitlement.api.user.SubscriptionData;
 import com.ning.billing.entitlement.api.user.TestUtil;
-import com.ning.billing.entitlement.api.user.TestUtil.EntitlementSubscriptionMigrationCaseWithCTD;
-import com.ning.billing.entitlement.engine.core.Engine;
 import com.ning.billing.entitlement.engine.dao.EntitlementDao;
-import com.ning.billing.entitlement.engine.dao.MockEntitlementDaoMemory;
-import com.ning.billing.entitlement.events.EntitlementEvent;
-import com.ning.billing.entitlement.glue.MockEngineModuleMemory;
 import com.ning.billing.entitlement.glue.MockEngineModuleSql;
-import com.ning.billing.mock.MockAccountBuilder;
-import com.ning.billing.util.bus.DefaultBusService;
 import com.ning.billing.util.clock.ClockMock;
 import com.ning.billing.util.config.EntitlementConfig;
-import com.ning.billing.util.events.EffectiveSubscriptionInternalEvent;
 import com.ning.billing.util.svcapi.entitlement.EntitlementInternalApi;
 import com.ning.billing.util.svcsapi.bus.BusService;
 
@@ -77,9 +49,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 
-import static org.testng.Assert.assertNotNull;
-
-public class EntitlementTestSuiteWithEmbeddedDB extends GuicyKillbillTestSuiteWithEmbeddedDB  {
+public class EntitlementTestSuiteWithEmbeddedDB extends GuicyKillbillTestSuiteWithEmbeddedDB {
 
 
     protected static final Logger log = LoggerFactory.getLogger(EntitlementTestSuiteWithEmbeddedDB.class);
@@ -116,208 +86,50 @@ public class EntitlementTestSuiteWithEmbeddedDB extends GuicyKillbillTestSuiteWi
     @Inject
     protected TestListenerStatus testListenerStatus;
 
+    @Inject
+    protected EntitlementTestInitializer entitlementTestInitializer;
+
     protected Catalog catalog;
     protected AccountData accountData;
     protected SubscriptionBundle bundle;
 
 
-    //
-    // The date on which we make our test start; just to ensure that running tests at different dates does not
-    // produce different results. nothing specific about that date; we could change it to anything.
-    //
-    protected DateTime testStartDate = new DateTime(2012, 5, 7, 0, 3, 42, 0);
-
-    public static void loadSystemPropertiesFromClasspath(final String resource) {
-        final URL url = EntitlementTestSuiteNoDB.class.getResource(resource);
-        assertNotNull(url);
-
-        try {
-            System.getProperties().load(url.openStream());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    @BeforeClass(groups = "slow")
+    public void setup() throws Exception {
+        DefaultEntitlementTestInitializer.loadSystemPropertiesFromClasspath("/entitlement.properties");
+        final Injector g = Guice.createInjector(Stage.PRODUCTION, new MockEngineModuleSql());
+        g.injectMembers(this);
     }
+
 
     @AfterClass(groups = "slow")
     public void tearDown() {
+        /*
         try {
             ((DefaultBusService) busService).stopBus();
         } catch (Exception e) {
             log.warn("Failed to tearDown test properly ", e);
         }
-    }
-
-
-    @BeforeClass(groups = "slow")
-    public void setup() throws Exception {
-        loadSystemPropertiesFromClasspath("/entitlement.properties");
-        final Injector g = Guice.createInjector(Stage.PRODUCTION, new MockEngineModuleSql());
-
-        g.injectMembers(this);
-
-        /*
-        entitlementService = g.getInstance(EntitlementService.class);
-        entitlementApi = g.getInstance(Key.get(EntitlementUserApi.class, RealImplementation.class));
-        entitlementInternalApi = g.getInstance(EntitlementInternalApi.class);
-        migrationApi = g.getInstance(EntitlementMigrationApi.class);
-        repairApi = g.getInstance(EntitlementTimelineApi.class);
-        transferApi = g.getInstance(EntitlementTransferApi.class);
-        catalogService = g.getInstance(CatalogService.class);
-        busService = g.getInstance(BusService.class);
-        config = g.getInstance(EntitlementConfig.class);
-        dao = g.getInstance(EntitlementDao.class);
-        clock = (ClockMock) g.getInstance(Clock.class);
         */
-        init();
-    }
-
-    private void init() throws Exception {
-        ((DefaultCatalogService) catalogService).loadCatalog();
-
-        final BillCycleDay billCycleDay = Mockito.mock(BillCycleDay.class);
-        Mockito.when(billCycleDay.getDayOfMonthUTC()).thenReturn(1);
-        accountData = new MockAccountBuilder().name(UUID.randomUUID().toString())
-                                              .firstNameLength(6)
-                                              .email(UUID.randomUUID().toString())
-                                              .phone(UUID.randomUUID().toString())
-                                              .migrated(false)
-                                              .isNotifiedForInvoices(false)
-                                              .externalKey(UUID.randomUUID().toString())
-                                              .billingCycleDay(billCycleDay)
-                                              .currency(Currency.USD)
-                                              .paymentMethodId(UUID.randomUUID())
-                                              .timeZone(DateTimeZone.forID("Europe/Paris"))
-                                              .build();
-
-        assertNotNull(accountData);
-        catalog = catalogService.getFullCatalog();
-        assertNotNull(catalog);
     }
 
 
     @BeforeMethod(groups = "slow")
     public void setupTest() throws Exception {
-        log.warn("RESET TEST FRAMEWORK");
+        entitlementTestInitializer.startTestFamework(testListener, testListenerStatus, clock, busService, entitlementService);
 
-        // RESET LIST OF EXPECTED EVENTS
-        if (testListener != null) {
-            testListener.reset();
-            testListenerStatus.resetTestListenerStatus();
-        }
-
-        // RESET CLOCK
-        clock.resetDeltaFromReality();
-
-        // START BUS AND REGISTER LISTENER
-        busService.getBus().start();
-        busService.getBus().register(testListener);
-
-        // START NOTIFICATION QUEUE FOR ENTITLEMENT
-        ((Engine) entitlementService).initialize();
-        ((Engine) entitlementService).start();
-
-        // SETUP START DATE
-        clock.setDeltaFromReality(testStartDate.getMillis() - clock.getUTCNow().getMillis());
-
-        // CREATE NEW BUNDLE FOR TEST
-        final UUID accountId = UUID.randomUUID();
-        bundle = entitlementApi.createBundleForAccount(accountId, "myDefaultBundle", callContext);
-        assertNotNull(bundle);
+        this.catalog = entitlementTestInitializer.initCatalog(catalogService);
+        this.accountData = entitlementTestInitializer.initAccountData();
+        this.bundle = entitlementTestInitializer.initBundle(entitlementApi, callContext);
     }
+
 
     @AfterMethod(groups = "slow")
     public void cleanupTest() throws Exception {
-        // UNREGISTER TEST LISTENER AND STOP BUS
-        busService.getBus().unregister(testListener);
-        busService.getBus().stop();
-
-        // STOP NOTIFICATION QUEUE
-        ((Engine) entitlementService).stop();
-
-        log.warn("DONE WITH TEST");
+        entitlementTestInitializer.stopTestFramework(testListener, busService, entitlementService);
     }
 
     protected void assertListenerStatus() {
         ((EntitlementTestListenerStatus) testListenerStatus).assertListenerStatus();
-    }
-
-    protected SubscriptionData createSubscription(final String productName, final BillingPeriod term, final String planSet, final DateTime requestedDate)
-            throws EntitlementUserApiException {
-        return testUtil.createSubscriptionWithBundle(bundle.getId(), productName, term, planSet, requestedDate);
-    }
-
-    protected SubscriptionData createSubscription(final String productName, final BillingPeriod term, final String planSet)
-            throws EntitlementUserApiException {
-        return testUtil.createSubscriptionWithBundle(bundle.getId(), productName, term, planSet, null);
-    }
-
-    protected SubscriptionData createSubscriptionWithBundle(final UUID bundleId, final String productName, final BillingPeriod term, final String planSet, final DateTime requestedDate)
-            throws EntitlementUserApiException {
-        return testUtil.createSubscriptionWithBundle(bundleId, productName, term, planSet, requestedDate);
-    }
-
-    protected void checkNextPhaseChange(final SubscriptionData subscription, final int expPendingEvents, final DateTime expPhaseChange) {
-
-        testUtil.checkNextPhaseChange(subscription, expPendingEvents, expPhaseChange);
-    }
-
-    protected void assertDateWithin(final DateTime in, final DateTime lower, final DateTime upper) {
-        testUtil.assertDateWithin(in, lower, upper);
-    }
-
-    protected Duration getDurationDay(final int days) {
-        return testUtil.getDurationDay(days);
-    }
-
-    protected Duration getDurationMonth(final int months) {
-        return testUtil.getDurationMonth(months);
-    }
-
-    protected Duration getDurationYear(final int years) {
-        return testUtil.getDurationYear(years);
-    }
-
-    protected PlanPhaseSpecifier getProductSpecifier(final String productName, final String priceList,
-                                                     final BillingPeriod term,
-                                                     @Nullable final PhaseType phaseType) {
-        return testUtil.getProductSpecifier(productName, priceList, term, phaseType);
-    }
-
-    protected void printEvents(final List<EntitlementEvent> events) {
-        testUtil.printEvents(events);
-    }
-
-    protected void printSubscriptionTransitions(final List<EffectiveSubscriptionInternalEvent> transitions) {
-        testUtil.printSubscriptionTransitions(transitions);
-    }
-
-    /**
-     * ***********************************************************
-     * Utilities for migration tests
-     * *************************************************************
-     */
-
-    protected EntitlementAccountMigration createAccountForMigrationTest(final List<List<EntitlementSubscriptionMigrationCaseWithCTD>> cases) {
-        return testUtil.createAccountForMigrationTest(cases);
-    }
-
-    protected EntitlementAccountMigration createAccountForMigrationWithRegularBasePlanAndAddons(final DateTime initialBPstart, final DateTime initalAddonStart) {
-        return testUtil.createAccountForMigrationWithRegularBasePlanAndAddons(initialBPstart, initalAddonStart);
-    }
-
-    protected EntitlementAccountMigration createAccountForMigrationWithRegularBasePlan(final DateTime startDate) {
-        return testUtil.createAccountForMigrationWithRegularBasePlan(startDate);
-    }
-
-    protected EntitlementAccountMigration createAccountForMigrationWithRegularBasePlanFutreCancelled(final DateTime startDate) {
-        return testUtil.createAccountForMigrationWithRegularBasePlanFutreCancelled(startDate);
-    }
-
-    protected EntitlementAccountMigration createAccountForMigrationFuturePendingPhase(final DateTime trialDate) {
-        return testUtil.createAccountForMigrationFuturePendingPhase(trialDate);
-    }
-
-    protected EntitlementAccountMigration createAccountForMigrationFuturePendingChange() {
-        return testUtil.createAccountForMigrationFuturePendingChange();
     }
 }

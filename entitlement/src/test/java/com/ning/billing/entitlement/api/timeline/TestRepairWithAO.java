@@ -61,15 +61,15 @@ public class TestRepairWithAO extends EntitlementTestSuiteWithEmbeddedDB {
         final String basePriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
         // CREATE BP
-        final SubscriptionData baseSubscription = createSubscription(baseProduct, baseTerm, basePriceList);
+        final SubscriptionData baseSubscription = testUtil.createSubscription(bundle, baseProduct, baseTerm, basePriceList);
 
         // MOVE CLOCK A LITTLE BIT-- STILL IN TRIAL
         Interval it = new Interval(clock.getUTCNow(), clock.getUTCNow().plusDays(4));
         clock.addDeltaFromReality(it.toDurationMillis());
 
-        final SubscriptionData aoSubscription = createSubscription("Telescopic-Scope", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
+        final SubscriptionData aoSubscription = testUtil.createSubscription(bundle, "Telescopic-Scope", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
 
-        final SubscriptionData aoSubscription2 = createSubscription("Laser-Scope", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
+        final SubscriptionData aoSubscription2 = testUtil.createSubscription(bundle, "Laser-Scope", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
 
         // MOVE CLOCK A LITTLE BIT MORE -- STILL IN TRIAL
         it = new Interval(clock.getUTCNow(), clock.getUTCNow().plusDays(3));
@@ -210,13 +210,13 @@ public class TestRepairWithAO extends EntitlementTestSuiteWithEmbeddedDB {
         final String basePriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
         // CREATE BP
-        final SubscriptionData baseSubscription = createSubscription(baseProduct, baseTerm, basePriceList);
+        final SubscriptionData baseSubscription = testUtil.createSubscription(bundle, baseProduct, baseTerm, basePriceList);
 
         // MOVE CLOCK A LITTLE BIT-- STILL IN TRIAL
         Interval it = new Interval(clock.getUTCNow(), clock.getUTCNow().plusDays(3));
         clock.addDeltaFromReality(it.toDurationMillis());
 
-        final SubscriptionData aoSubscription = createSubscription("Telescopic-Scope", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
+        final SubscriptionData aoSubscription = testUtil.createSubscription(bundle, "Telescopic-Scope", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
 
         // MOVE CLOCK A LITTLE BIT MORE -- AFTER TRIAL
         testListener.pushExpectedEvent(NextEvent.PHASE);
@@ -329,13 +329,13 @@ public class TestRepairWithAO extends EntitlementTestSuiteWithEmbeddedDB {
         final String basePriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
         // CREATE BP
-        SubscriptionData baseSubscription = createSubscription(baseProduct, baseTerm, basePriceList);
+        SubscriptionData baseSubscription = testUtil.createSubscription(bundle, baseProduct, baseTerm, basePriceList);
 
         // MOVE CLOCK A LITTLE BIT-- STILL IN TRIAL
         Interval it = new Interval(clock.getUTCNow(), clock.getUTCNow().plusDays(4));
         clock.addDeltaFromReality(it.toDurationMillis());
 
-        final SubscriptionData aoSubscription = createSubscription("Telescopic-Scope", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
+        final SubscriptionData aoSubscription = testUtil.createSubscription(bundle, "Telescopic-Scope", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
 
         // MOVE CLOCK A LITTLE BIT MORE -- AFTER TRIAL
         testListener.pushExpectedEvent(NextEvent.PHASE);
@@ -468,13 +468,13 @@ public class TestRepairWithAO extends EntitlementTestSuiteWithEmbeddedDB {
         final String basePriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
         // CREATE BP
-        final SubscriptionData baseSubscription = createSubscription(baseProduct, baseTerm, basePriceList);
+        final SubscriptionData baseSubscription = testUtil.createSubscription(bundle, baseProduct, baseTerm, basePriceList);
 
         // MOVE CLOCK A LITTLE BIT-- STILL IN TRIAL
         Interval it = new Interval(clock.getUTCNow(), clock.getUTCNow().plusDays(4));
         clock.addDeltaFromReality(it.toDurationMillis());
 
-        final SubscriptionData aoSubscription = createSubscription("Telescopic-Scope", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
+        final SubscriptionData aoSubscription = testUtil.createSubscription(bundle, "Telescopic-Scope", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
 
         // MOVE CLOCK A LITTLE BIT MORE -- STILL IN TRIAL
         it = new Interval(clock.getUTCNow(), clock.getUTCNow().plusDays(3));
@@ -558,13 +558,13 @@ public class TestRepairWithAO extends EntitlementTestSuiteWithEmbeddedDB {
         final String basePriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
         // CREATE BP
-        final SubscriptionData baseSubscription = createSubscription(baseProduct, baseTerm, basePriceList);
+        final SubscriptionData baseSubscription = testUtil.createSubscription(bundle, baseProduct, baseTerm, basePriceList);
 
         // MOVE CLOCK A LITTLE BIT-- STILL IN TRIAL
         Interval it = new Interval(clock.getUTCNow(), clock.getUTCNow().plusDays(4));
         clock.addDeltaFromReality(it.toDurationMillis());
 
-        final SubscriptionData aoSubscription = createSubscription("Telescopic-Scope", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
+        final SubscriptionData aoSubscription = testUtil.createSubscription(bundle, "Telescopic-Scope", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
 
         // MOVE CLOCK A LITTLE BIT MORE -- STILL IN TRIAL
         it = new Interval(clock.getUTCNow(), clock.getUTCNow().plusDays(3));
@@ -649,13 +649,13 @@ public class TestRepairWithAO extends EntitlementTestSuiteWithEmbeddedDB {
         final String basePriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
         // CREATE BP
-        final SubscriptionData baseSubscription = createSubscription(baseProduct, baseTerm, basePriceList);
+        final SubscriptionData baseSubscription = testUtil.createSubscription(bundle, baseProduct, baseTerm, basePriceList);
 
         // MOVE CLOCK A LITTLE BIT-- STILL IN TRIAL
         Interval it = new Interval(clock.getUTCNow(), clock.getUTCNow().plusDays(4));
         clock.addDeltaFromReality(it.toDurationMillis());
 
-        final SubscriptionData aoSubscription = createSubscription("Telescopic-Scope", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
+        final SubscriptionData aoSubscription = testUtil.createSubscription(bundle, "Telescopic-Scope", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME);
 
         // MOVE CLOCK A LITTLE BIT MORE -- STILL IN TRIAL
         it = new Interval(clock.getUTCNow(), clock.getUTCNow().plusDays(3));

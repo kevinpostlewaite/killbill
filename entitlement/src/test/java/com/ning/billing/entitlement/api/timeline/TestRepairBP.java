@@ -66,13 +66,13 @@ public class TestRepairBP extends EntitlementTestSuiteWithEmbeddedDB {
         final String basePriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
         // CREATE BP
-        final Subscription baseSubscription = createSubscription(baseProduct, baseTerm, basePriceList);
+        final Subscription baseSubscription = testUtil.createSubscription(bundle, baseProduct, baseTerm, basePriceList);
 
         final String aoProduct = "Telescopic-Scope";
         final BillingPeriod aoTerm = BillingPeriod.MONTHLY;
         final String aoPriceList = PriceListSet.DEFAULT_PRICELIST_NAME;
 
-        final SubscriptionData aoSubscription = createSubscription(aoProduct, aoTerm, aoPriceList);
+        final SubscriptionData aoSubscription = testUtil.createSubscription(bundle, aoProduct, aoTerm, aoPriceList);
 
         final BundleTimeline bundleRepair = repairApi.getBundleTimeline(bundle.getId(), callContext);
         final List<SubscriptionTimeline> subscriptionRepair = bundleRepair.getSubscriptions();
@@ -128,7 +128,7 @@ public class TestRepairBP extends EntitlementTestSuiteWithEmbeddedDB {
         final DateTime startDate = clock.getUTCNow();
 
         // CREATE BP
-        final Subscription baseSubscription = createSubscription(baseProduct, BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, startDate);
+        final Subscription baseSubscription = testUtil.createSubscription(bundle, baseProduct, BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, startDate);
 
         // Stays in trial-- for instance
         final Interval it = new Interval(clock.getUTCNow(), clock.getUTCNow().plusDays(10));
@@ -291,7 +291,7 @@ public class TestRepairBP extends EntitlementTestSuiteWithEmbeddedDB {
     private UUID testBPRepairCreate(final boolean inTrial, final DateTime startDate, final int clockShift,
                                     final String baseProduct, final String newBaseProduct, final List<ExistingEvent> expectedEvents) throws Exception {
         // CREATE BP
-        final Subscription baseSubscription = createSubscription(baseProduct, BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, startDate);
+        final Subscription baseSubscription = testUtil.createSubscription(bundle, baseProduct, BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, startDate);
 
         // MOVE CLOCK
         if (clockShift > 0) {
@@ -463,7 +463,7 @@ public class TestRepairBP extends EntitlementTestSuiteWithEmbeddedDB {
     private UUID testBPRepairAddChange(final boolean inTrial, final DateTime startDate, final int clockShift,
                                        final String baseProduct, final String newBaseProduct, final List<ExistingEvent> expectedEvents, final int expectedTransitions) throws Exception {
         // CREATE BP
-        final Subscription baseSubscription = createSubscription(baseProduct, BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, startDate);
+        final Subscription baseSubscription = testUtil.createSubscription(bundle, baseProduct, BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, startDate);
 
         // MOVE CLOCK
         if (!inTrial) {
@@ -572,7 +572,7 @@ public class TestRepairBP extends EntitlementTestSuiteWithEmbeddedDB {
         final DateTime startDate = clock.getUTCNow();
 
         // CREATE BP
-        Subscription baseSubscription = createSubscription("Shotgun", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, startDate);
+        Subscription baseSubscription = testUtil.createSubscription(bundle, "Shotgun", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, startDate);
 
         // MOVE CLOCK -- OUT OF TRIAL
         testListener.pushExpectedEvent(NextEvent.PHASE);
@@ -641,7 +641,7 @@ public class TestRepairBP extends EntitlementTestSuiteWithEmbeddedDB {
         final TestWithException test = new TestWithException();
         final DateTime startDate = clock.getUTCNow();
 
-        final Subscription baseSubscription = createSubscription("Shotgun", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, startDate);
+        final Subscription baseSubscription = testUtil.createSubscription(bundle, "Shotgun", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, startDate);
 
         test.withException(new TestWithExceptionCallback() {
             @Override
@@ -674,7 +674,7 @@ public class TestRepairBP extends EntitlementTestSuiteWithEmbeddedDB {
         final TestWithException test = new TestWithException();
         final DateTime startDate = clock.getUTCNow();
 
-        final Subscription baseSubscription = createSubscription("Shotgun", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, startDate);
+        final Subscription baseSubscription = testUtil.createSubscription(bundle, "Shotgun", BillingPeriod.MONTHLY, PriceListSet.DEFAULT_PRICELIST_NAME, startDate);
 
         test.withException(new TestWithExceptionCallback() {
             @Override

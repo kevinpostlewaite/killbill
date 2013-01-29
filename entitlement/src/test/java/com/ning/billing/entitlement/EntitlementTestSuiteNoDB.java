@@ -131,18 +131,6 @@ public class EntitlementTestSuiteNoDB extends GuicyKillbillTestSuiteNoDB  {
     }
 
 
-    @AfterClass(groups = "slow")
-    public void tearDown() {
-        /*
-        try {
-            ((DefaultBusService) busService).stopBus();
-        } catch (Exception e) {
-            log.warn("Failed to tearDown test properly ", e);
-        }
-        */
-    }
-
-
     @BeforeMethod(groups = "slow")
     public void setupTest() throws Exception {
 
@@ -162,7 +150,9 @@ public class EntitlementTestSuiteNoDB extends GuicyKillbillTestSuiteNoDB  {
         entitlementTestInitializer.stopTestFramework(testListener, busService, entitlementService);
     }
 
+    /*
     protected void assertListenerStatus() {
         ((EntitlementTestListenerStatus) testListenerStatus).assertListenerStatus();
     }
+    */
 }

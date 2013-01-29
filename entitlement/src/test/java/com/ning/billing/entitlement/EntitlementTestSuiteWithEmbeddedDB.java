@@ -102,18 +102,6 @@ public class EntitlementTestSuiteWithEmbeddedDB extends GuicyKillbillTestSuiteWi
     }
 
 
-    @AfterClass(groups = "slow")
-    public void tearDown() {
-        /*
-        try {
-            ((DefaultBusService) busService).stopBus();
-        } catch (Exception e) {
-            log.warn("Failed to tearDown test properly ", e);
-        }
-        */
-    }
-
-
     @BeforeMethod(groups = "slow")
     public void setupTest() throws Exception {
         entitlementTestInitializer.startTestFamework(testListener, testListenerStatus, clock, busService, entitlementService);

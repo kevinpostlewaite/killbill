@@ -150,9 +150,7 @@ public class EntitlementTestSuiteNoDB extends GuicyKillbillTestSuiteNoDB  {
         entitlementTestInitializer.stopTestFramework(testListener, busService, entitlementService);
     }
 
-    /*
     protected void assertListenerStatus() {
         ((EntitlementTestListenerStatus) testListenerStatus).assertListenerStatus();
     }
-    */
 }

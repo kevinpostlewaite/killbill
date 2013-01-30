@@ -16,16 +16,24 @@
 
 package com.ning.billing.entitlement.glue;
 
+import java.util.UUID;
+
+import javax.annotation.Nullable;
+
 import org.mockito.Mockito;
 import org.skife.config.ConfigurationObjectFactory;
 import org.skife.jdbi.v2.IDBI;
 
+import com.ning.billing.GuicyKillbillTestModule;
+import com.ning.billing.ObjectType;
+import com.ning.billing.api.TestListenerStatus;
 import com.ning.billing.entitlement.api.timeline.RepairEntitlementLifecycleDao;
 import com.ning.billing.entitlement.engine.dao.EntitlementDao;
 import com.ning.billing.entitlement.engine.dao.MockEntitlementDaoMemory;
 import com.ning.billing.entitlement.engine.dao.RepairEntitlementDao;
-import com.ning.billing.util.callcontext.CallContextSqlDao;
-import com.ning.billing.util.callcontext.MockCallContextSqlDao;
+import com.ning.billing.mock.glue.MockNonEntityDaoModule;
+import com.ning.billing.util.cache.CacheController;
+import com.ning.billing.util.dao.NonEntityDao;
 import com.ning.billing.util.glue.BusModule;
 import com.ning.billing.util.glue.BusModule.BusType;
 import com.ning.billing.util.notificationq.MockNotificationQueueService;
@@ -56,15 +64,21 @@ public class MockEngineModuleMemory extends MockEngineModule {
 
     protected void installDBI() {
         final IDBI idbi = Mockito.mock(IDBI.class);
-        Mockito.when(idbi.onDemand(CallContextSqlDao.class)).thenReturn(new MockCallContextSqlDao());
         bind(IDBI.class).toInstance(idbi);
     }
 
     @Override
     protected void configure() {
         installDBI();
+
+        install(new GuicyKillbillTestModule());
+
         super.configure();
+
         install(new BusModule(BusType.MEMORY));
         installNotificationQueue();
+
+        install(new MockNonEntityDaoModule());
+
     }
 }

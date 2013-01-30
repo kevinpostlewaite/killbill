@@ -21,7 +21,6 @@ import java.util.UUID;
 
 import org.joda.time.DateTime;
 import org.mockito.Mockito;
-import org.skife.jdbi.v2.IDBI;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -34,7 +33,7 @@ import com.ning.billing.catalog.api.PhaseType;
 import com.ning.billing.catalog.api.PlanPhaseSpecifier;
 import com.ning.billing.catalog.api.PriceListSet;
 import com.ning.billing.catalog.api.ProductCategory;
-import com.ning.billing.entitlement.EntitlementTestSuite;
+import com.ning.billing.entitlement.EntitlementTestSuiteNoDB;
 import com.ning.billing.entitlement.api.SubscriptionApiService;
 import com.ning.billing.entitlement.api.SubscriptionTransitionType;
 import com.ning.billing.entitlement.api.timeline.EntitlementTimelineApi;
@@ -46,26 +45,25 @@ import com.ning.billing.entitlement.events.EntitlementEvent;
 import com.ning.billing.entitlement.events.EntitlementEvent.EventType;
 import com.ning.billing.entitlement.events.user.ApiEventTransfer;
 import com.ning.billing.entitlement.events.user.ApiEventType;
+import com.ning.billing.util.cache.CacheControllerDispatcher;
 import com.ning.billing.util.callcontext.InternalCallContextFactory;
-import com.ning.billing.util.clock.Clock;
-import com.ning.billing.util.clock.ClockMock;
+import com.ning.billing.util.dao.NonEntityDao;
 
 import com.google.common.collect.ImmutableList;
 
 // Simple unit tests for DefaultEntitlementTransferApi, see TestTransfer for more advanced tests with dao
-public class TestDefaultEntitlementTransferApi extends EntitlementTestSuite {
-
-    private final Clock clock = new ClockMock();
+public class TestDefaultEntitlementTransferApi extends EntitlementTestSuiteNoDB {
 
     private DefaultEntitlementTransferApi transferApi;
 
     @BeforeMethod(groups = "fast")
     public void setUp() throws Exception {
+        final NonEntityDao nonEntityDao = Mockito.mock(NonEntityDao.class);
         final EntitlementDao dao = Mockito.mock(EntitlementDao.class);
         final CatalogService catalogService = new MockCatalogService(new MockCatalog());
-        final SubscriptionApiService apiService =  Mockito.mock(SubscriptionApiService.class);
+        final SubscriptionApiService apiService = Mockito.mock(SubscriptionApiService.class);
         final EntitlementTimelineApi timelineApi = Mockito.mock(EntitlementTimelineApi.class);
-        final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(Mockito.mock(IDBI.class), clock);
+        final InternalCallContextFactory internalCallContextFactory = new InternalCallContextFactory(clock, nonEntityDao, new CacheControllerDispatcher());
         transferApi = new DefaultEntitlementTransferApi(clock, dao, timelineApi, catalogService, apiService, internalCallContextFactory);
     }
 

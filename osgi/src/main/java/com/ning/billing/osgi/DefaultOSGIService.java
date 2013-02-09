@@ -67,7 +67,7 @@ public class DefaultOSGIService implements OSGIService {
     private final PaymentProviderPluginRegistry paymentProviderPluginRegistry;
 
     private Framework framework;
-    private volatile ServiceReference<PaymentPluginApi>[] paymentApiReferences;
+    private volatile ServiceReference[] paymentApiReferences;
     private Map<String, PaymentPluginApi> paymentPluginApis;
 
     @Inject
@@ -206,9 +206,9 @@ public class DefaultOSGIService implements OSGIService {
 
         final BundleContext context = framework.getBundleContext();
 
-        paymentApiReferences = (ServiceReference<PaymentPluginApi>[]) context.getServiceReferences(PaymentPluginApi.class.getName(), null);
+        paymentApiReferences = (ServiceReference[]) context.getServiceReferences(PaymentPluginApi.class.getName(), null);
         final ImmutableMap.Builder paymentPluginApisBuilder = ImmutableMap.builder();
-        for (ServiceReference<PaymentPluginApi> ref : paymentApiReferences) {
+        for (ServiceReference ref : paymentApiReferences) {
             // TODO 'name' STEPH needs to be in API
             paymentPluginApisBuilder.put(ref.getProperty("name"), context.getService(ref));
         }
@@ -217,7 +217,7 @@ public class DefaultOSGIService implements OSGIService {
 
 
     private void releasePaymentPluginApis() {
-        for (ServiceReference<PaymentPluginApi> ref : paymentApiReferences) {
+        for (ServiceReference ref : paymentApiReferences) {
             final BundleContext context = framework.getBundleContext();
             context.ungetService(ref);
         }
